@@ -1,0 +1,28 @@
+---
+- name: Check for pending unattended upgrades
+  hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Check remote hosts for upgrades
+      block:
+        - name: Run unattended-upgrades dry-run
+          command: unattended-upgrades --dry-run
+          register: dry_run_result
+          changed_when: false
+          failed_when: false # Continue even if the command fails
+
+        - name: Save dry-run results to a temporary file
+          copy:
+            content: "{{ dry_run_result.stdout | default('No output') }}\n\n{{ dry_run_result.stderr | default('No errors') }}"
+            dest: "/home/keith/ansible_upgrade_check/reports/{{ inventory_hostname }}_upgrade_check.txt"
+          delegate_to: localhost
+          when: dry_run_result.stdout != ""
+
+        - name: Save 'no upgrades' message to a temporary file
+          copy:
+            content: "No pending security upgrades."
+            dest: "/home/keith/ansible_upgrade_check/reports/{{ inventory_hostname }}_upgrade_check.txt"
+          delegate_to: localhost
+          when: dry_run_result.stdout == ""
+      
