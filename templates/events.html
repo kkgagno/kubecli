@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Kubernetes Events{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <h1>Kubernetes Events</h1>
+    <form class="row g-3 align-items-center mb-3" method="GET" action="/events">
+        <div class="col-auto">
+            <label for="search" class="visually-hidden">Search</label>
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name or message" value="{{ search_query if search_query else '' }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Namespace</th>
+                <th>Last Timestamp</th>
+                <th>Type</th>
+                <th>Reason</th>
+                <th>Object</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>{{ event.metadata.namespace }}</td>
+                <td>{{ event.last_timestamp }}</td>
+                <td>{{ event.type }}</td>
+                <td>{{ event.reason }}</td>
+                <td>{{ event.involved_object.kind }}/{{ event.involved_object.name }}</td>
+                <td>{{ event.message }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

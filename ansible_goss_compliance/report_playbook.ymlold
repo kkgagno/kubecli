@@ -1,0 +1,87 @@
+---
+- name: Rerun Goss and Generate Reports
+  hosts: localhost
+  connection: local
+  vars:
+    goss_install_dir: "/usr/local/bin"
+    goss_tests_dir: "/etc/goss/tests"
+    local_goss_reports_dir: "./goss_reports"
+    html_report_output_dir: "./compliance_html_reports"
+  tasks:
+    - name: Find all Goss JSON reports
+      ansible.builtin.find:
+        paths: "{{ local_goss_reports_dir }}"
+        patterns: "*_goss_report.json"
+      register: json_reports
+
+    - name: Rerun Goss on existing reports
+      ansible.builtin.command: "{{ goss_install_dir }}/goss --gossfile {{ goss_tests_dir }}/goss.yml --vars {{ goss_tests_dir }}/goss-vars.yml validate --format json --format-options pretty"
+      register: goss_result
+      changed_when: false
+      ignore_errors: true
+      loop: "{{ json_reports.files }}"
+
+    - name: Save Goss JSON report to file
+      ansible.builtin.copy:
+        content: "{{ item.stdout }}"
+        dest: "{{ local_goss_reports_dir }}/{{ item.item.path | basename }}"
+        mode: '0644'
+      loop: "{{ goss_result.results }}"
+
+- name: Generate Individual HTML reports
+  hosts: localhost
+  connection: local
+  vars:
+    local_goss_reports_dir: "./goss_reports"
+    html_report_output_dir: "./compliance_html_reports"
+  tasks:
+    - name: Find all Goss JSON reports
+      ansible.builtin.find:
+        paths: "{{ local_goss_reports_dir }}"
+        patterns: "*_goss_report.json"
+      register: json_reports
+
+    - name: Generate HTML report for each host
+      ansible.builtin.template:
+        src: templates/compliance_report.j2
+        dest: "{{ html_report_output_dir }}/{{ item.path | basename | regex_replace('_goss_report.json', '.html') }}"
+      loop: "{{ json_reports.files }}"
+      vars:
+        report: "{{ lookup('file', item.path) | from_json }}"
+        hostname: "{{ item.path | basename | regex_replace('_goss_report.json', '') }}"
+      when: json_reports.files is defined and json_reports.files | length > 0
+
+- name: Generate Aggregated HTML Compliance Report
+  hosts: localhost
+  connection: local
+  vars:
+    local_goss_reports_dir: "./goss_reports"
+    html_report_output_dir: "./compliance_html_reports"
+    aggregated_report_data: []
+
+  tasks:
+    - name: Create local HTML report directory
+      ansible.builtin.file:
+        path: "{{ html_report_output_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Find all Goss JSON reports
+      ansible.builtin.find:
+        paths: "{{ local_goss_reports_dir }}"
+        patterns: "*_goss_report.json"
+      register: json_reports
+
+    - name: Aggregate JSON reports
+      ansible.builtin.set_fact:
+        aggregated_report_data: "{{ aggregated_report_data + [{ 'hostname': item.path | basename | regex_replace('_goss_report.json', ''), 'report': lookup('file', item.path) | from_json }] }}"
+      loop: "{{ json_reports.files }}"
+      when: json_reports.files is defined and json_reports.files | length > 0
+
+    - name: Generate Aggregated HTML report
+      ansible.builtin.template:
+        src: templates/aggregated_compliance_report.j2
+        dest: "{{ html_report_output_dir }}/aggregated_compliance_report.html"
+      vars:
+        reports: "{{ aggregated_report_data }}"
+      when: aggregated_report_data | length > 0

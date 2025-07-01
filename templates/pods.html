@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Kubernetes Pods{% endblock %}
+
+{% block head %}
+    <script>
+        function openLogs(namespace, podName, containerName) {
+            let url = `/logs/${namespace}/${podName}`;
+            if (containerName) {
+                url += `?container=${containerName}`;
+            }
+            window.open(url, '_blank', 'height=600,width=800');
+        }
+        function openDescribe(resourceType, namespace, name) {
+            window.open(`/describe/${resourceType}/${namespace}/${name}`, '_blank', 'height=600,width=800');
+        }
+        function confirmDelete(namespace, podName) {
+            if (confirm(`Are you sure you want to delete pod ${podName} in namespace ${namespace}? This action cannot be undone.`)) {
+                fetch(`/delete_pod/${namespace}/${podName}`, {
+                    method: 'POST',
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error deleting pod.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting pod.');
+                });
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Kubernetes Pods</h1>
+    <form class="row g-3 align-items-center mb-3" method="GET" action="/pods">
+        <div class="col-auto">
+            <label for="namespace" class="visually-hidden">Namespace</label>
+            <select class="form-select" id="namespace" name="namespace" onchange="this.form.submit()">
+                {% for ns in namespaces %}
+                    {% if ns == 'all' %}
+                    <option value="all" {% if ns == selected_namespace %}selected{% endif %}>All Namespaces</option>
+                {% else %}
+                    <option value="{{ ns }}" {% if ns == selected_namespace %}selected{% endif %}>{{ ns }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <label for="search" class="visually-hidden">Search</label>
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by pod name" value="{{ search_query if search_query else '' }}">
+        </div>
+        <div class="col-auto">
+            <label for="node_name" class="visually-hidden">Node</label>
+            <select class="form-select" id="node_name" name="node_name" onchange="this.form.submit()">
+                <option value="all" {% if selected_node_name == 'all' %}selected{% endif %}>All Nodes</option>
+                {% for node in nodes_list %}
+                    <option value="{{ node }}" {% if node == selected_node_name %}selected{% endif %}>{{ node }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Namespace</th>
+                <th>Pod Name</th>
+                <th>Status</th>
+                <th>Node</th>
+                <th>Age</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pod in pods %}
+            <tr>
+                <td>{{ pod.metadata.namespace }}</td>
+                <td>{{ pod.metadata.name }}</td>
+                <td>{{ pod.status.phase }}</td>
+                <td>{{ pod.spec.node_name }}</td>
+                <td>{{ pod.age }}</td>
+                <td style="white-space: nowrap;">
+                    <button class="btn btn-info btn-sm" onclick="openDescribe('pod', '{{ pod.metadata.namespace }}', '{{ pod.metadata.name }}')">Describe</button>
+                    <button class="btn btn-danger btn-sm" onclick="confirmDelete('{{ pod.metadata.namespace }}', '{{ pod.metadata.name }}')">Delete</button>
+                    <button class="btn btn-primary btn-sm" onclick="openLogs('{{ pod.metadata.namespace }}', '{{ pod.metadata.name }}', {% if pod.spec.containers|length > 1 %}document.getElementById('container-select-{{ pod.metadata.name }}').value{% else %}'{{ pod.spec.containers[0].name }}'{% endif %})">View Logs</button>
+                    {% if pod.spec.containers|length > 1 %}
+                        <div class="input-group mt-2">
+                            <select class="form-select" id="container-select-{{ pod.metadata.name }}">
+                                {% for container in pod.spec.containers %}
+                                    <option value="{{ container.name }}">{{ container.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

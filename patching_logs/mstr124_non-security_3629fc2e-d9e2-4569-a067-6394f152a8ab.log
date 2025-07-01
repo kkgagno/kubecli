@@ -1,0 +1,2 @@
+Running patch for mstr124 with command: sudo apt-get update && sudo apt-get dist-upgrade -y &> /home/keith/simple_kube_web_app/patching_logs/mstr124_non-security_3629fc2e-d9e2-4569-a067-6394f152a8ab.log
+

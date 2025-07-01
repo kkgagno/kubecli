@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Report Test</title>
+</head>
+<body>
+    <h1>Report Test</h1>
+    <select id="report_selector">
+        <option value="">Select a report</option>
+        <option value="/goss_reports/mstr124.html">mstr124.html</option>
+        <option value="/goss_reports/mstr224.html">mstr224.html</option>
+        <option value="/goss_reports/mstr324.html">mstr324.html</option>
+    </select>
+    <hr>
+    <iframe id="report_frame" width="100%" height="800px"></iframe>
+
+    <script>
+        document.getElementById('report_selector').addEventListener('change', function() {
+            var src = this.value;
+            if (src) {
+                document.getElementById('report_frame').src = src;
+            }
+        });
+    </script>
+</body>
+</html>

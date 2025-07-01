@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Upgrade Status{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Upgrade Status</h1>
+        <button id="refresh-status-button" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+              <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+            </svg>
+            Refresh Status
+        </button>
+    </div>
+
+    <div id="status-container">
+        <div class="alert alert-info" role="alert">
+            Click "Refresh Status" to check for updates on all hosts.
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const refreshButton = document.getElementById('refresh-status-button');
+            const statusContainer = document.getElementById('status-container');
+            let allUpdatesCache = {};
+
+            refreshButton.addEventListener('click', runUpgradeCheck);
+
+            async function runUpgradeCheck() {
+                statusContainer.innerHTML = '<div class="alert alert-info" role="alert">Running upgrade check on all hosts... This may take a moment.</div>';
+                
+                try {
+                    const response = await fetch('/run_upgrade_check_all', { method: 'POST' });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        pollTaskStatus(data.task_id, null, null, 'upgrade_check');
+                    } else {
+                        statusContainer.innerHTML = `<div class="alert alert-danger" role="alert">Error starting upgrade check: ${data.message}</div>`;
+                    }
+                } catch (error) {
+                    statusContainer.innerHTML = `<div class="alert alert-danger" role="alert">Network error: ${error.message}</div>`;
+                }
+            }
+
+            async function pollTaskStatus(taskId, statusEl) {
+                const interval = setInterval(async () => {
+                    try {
+                        const response = await fetch(`/get_task_status/${taskId}`);
+                        const data = await response.json();
+
+                        if (data.status === 'completed') {
+                            clearInterval(interval);
+                            if (data.type === 'patch') {
+                                if (statusEl) {
+                                    statusEl.textContent = 'Patched';
+                                    statusEl.classList.remove('bg-info');
+                                    statusEl.classList.add('bg-success');
+                                }
+                                const newWindow = window.open("", "_blank", "height=600,width=800");
+                                let title = '';
+                                if (data.patch_type === 'security') {
+                                    title = `Security patches for ${data.hostname}`;
+                                } else if (data.patch_type === 'non-security') {
+                                    title = `Non-Security patches for ${data.hostname}`;
+                                }
+                                
+                                if (title) {
+                                    newWindow.document.title = title;
+                                    newWindow.document.write(`<h1>${title}</h1><pre>${data.output}</pre>`);
+                                } else {
+                                    newWindow.document.write("<pre>" + data.output + "</pre>");
+                                }
+                            } else {
+                                await cacheAllUpdates();
+                                displayHostStatuses();
+                            }
+                        } else if (data.status === 'failed' || data.status === 'error') {
+                            clearInterval(interval);
+                            if (statusEl) {
+                                statusEl.textContent = 'Error';
+                                statusEl.classList.remove('bg-info');
+                                statusEl.classList.add('bg-danger');
+                            }
+                            const newWindow = window.open("", "_blank", "height=600,width=800");
+                            newWindow.document.write("<pre>" + data.output + "</pre>");
+                        }
+                    } catch (error) {
+                        clearInterval(interval);
+                        if (statusEl) {
+                            statusEl.textContent = 'Error';
+                            statusEl.classList.remove('bg-info');
+                            statusEl.classList.add('bg-danger');
+                        }
+                        console.error('Error polling task status:', error);
+                    }
+                }, 5000);
+            }
+            
+            async function cacheAllUpdates() {
+                try {
+                    const response = await fetch('/get_all_updates');
+                    allUpdatesCache = await response.json();
+                } catch (error) {
+                    console.error("Error caching updates:", error);
+                }
+            }
+
+            function displayHostStatuses() {
+                const hosts = {{ hosts_list | tojson }};
+                let html = '';
+
+                for (const host of hosts) {
+                    if (host === 'nginx') continue;
+
+                    const hostData = allUpdatesCache[host];
+                    let statusText = 'Checking...';
+                    let statusClass = 'bg-secondary';
+
+                    if (hostData) {
+                        if (hostData.has_security_updates) {
+                            statusText = 'Patches needed';
+                            statusClass = 'bg-danger';
+                        } else {
+                            statusText = 'No patches needed';
+                            statusClass = 'bg-success';
+                        }
+                    } else if (hostData && hostData.error) {
+                        statusText = 'Error';
+                        statusClass = 'bg-warning';
+                    }
+
+                    html += `
+                        <div class="card mt-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <strong>${host}</strong>
+                                <span id="status-${host}" class="badge ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <button class="btn btn-sm btn-primary security-updates-button" data-hostname="${host}">Security Updates</button>
+                                        <button class="btn btn-sm btn-info non-security-updates-button" data-hostname="${host}">Other Updates</button>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-danger patch-button me-2" data-hostname="${host}" data-patch-type="security">Patch Security</button>
+                                        <button class="btn btn-sm btn-warning patch-button" data-hostname="${host}" data-patch-type="non-security">Patch Non-Security</button>
+                                    </div>
+                                </div>
+                                <div id="details-${host}" class="mt-3" style="display: none;"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+                statusContainer.innerHTML = html;
+                addEventListeners();
+            }
+            
+            function addEventListeners() {
+                document.querySelectorAll('.security-updates-button').forEach(button => {
+                    button.addEventListener('click', () => toggleSecurityUpdates(button.dataset.hostname));
+                });
+                document.querySelectorAll('.non-security-updates-button').forEach(button => {
+                    button.addEventListener('click', () => toggleOtherUpdates(button.dataset.hostname));
+                });
+                document.querySelectorAll('.patch-button').forEach(button => {
+                    button.addEventListener('click', () => runPatch(button.dataset.hostname, button.dataset.patchType));
+                });
+            }
+
+            function runPatch(hostname, patchType) {
+                if (confirm(`Are you sure you want to patch ${patchType} updates for ${hostname}?`)) {
+                    const statusEl = document.getElementById(`status-${hostname}`);
+                    statusEl.textContent = 'Patching...';
+                    statusEl.classList.remove('bg-danger', 'bg-success', 'bg-warning');
+                    statusEl.classList.add('bg-info');
+
+                    fetch(`/run_patch/${hostname}/${patchType}`, { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.task_id) {
+                                pollTaskStatus(data.task_id, statusEl);
+                            } else {
+                                alert(data.message);
+                                statusEl.textContent = 'Error';
+                                statusEl.classList.remove('bg-info');
+                                statusEl.classList.add('bg-danger');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while trying to run the patch.');
+                            statusEl.textContent = 'Error';
+                            statusEl.classList.remove('bg-info');
+                            statusEl.classList.add('bg-danger');
+                        });
+                }
+            }
+
+            function toggleSecurityUpdates(hostname) {
+                const detailsEl = document.getElementById(`details-${hostname}`);
+                if (detailsEl.style.display === 'none' || !detailsEl.innerHTML.includes('<h5>Security Updates</h5>')) {
+                    let html = '<h5>Security Updates</h5>';
+                    const data = allUpdatesCache[hostname];
+                    if (data && data.security_updates && data.security_updates.length > 0) {
+                        html += '<ul>';
+                        data.security_updates.forEach(update => {
+                            html += `<li>${update}</li>`;
+                        });
+                        html += '</ul>';
+                    } else {
+                        html += '<p>No security updates available.</p>';
+                    }
+                    detailsEl.innerHTML = html;
+                    detailsEl.style.display = 'block';
+                } else {
+                    detailsEl.style.display = 'none';
+                }
+            }
+
+            function toggleOtherUpdates(hostname) {
+                const detailsEl = document.getElementById(`details-${hostname}`);
+                if (detailsEl.style.display === 'none' || !detailsEl.innerHTML.includes('<h5>Other Updates</h5>')) {
+                    let html = '<h5>Other Updates</h5>';
+                    const data = allUpdatesCache[hostname];
+                    if (data && data.other_updates && data.other_updates.length > 0) {
+                        html += '<ul>';
+                        data.other_updates.forEach(pkg => {
+                            html += `<li>${pkg.name} (${pkg.new_version})</li>`;
+                        });
+                        html += '</ul>';
+                    } else {
+                        html += '<p>No other updates available.</p>';
+                    }
+                    detailsEl.innerHTML = html;
+                    detailsEl.style.display = 'block';
+                } else {
+                    detailsEl.style.display = 'none';
+                }
+            }
+        });
+    </script>
+{% endblock %}

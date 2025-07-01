@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Kubernetes Jobs{% endblock %}
+
+{% block head %}
+    <script>
+        function openDescribe(resourceType, namespace, name) {
+            window.open(`/describe/${resourceType}/${namespace}/${name}`, '_blank', 'height=600,width=800');
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Kubernetes Jobs</h1>
+    <form class="row g-3 align-items-center mb-3" method="GET" action="/jobs">
+        <div class="col-auto">
+            <label for="search" class="visually-hidden">Search</label>
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query if search_query else '' }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Namespace</th>
+                <th>Job Name</th>
+                <th>Completions</th>
+                <th>Succeeded</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.metadata.namespace }}</td>
+                <td>{{ job.metadata.name }}</td>
+                <td>{{ job.spec.completions }}</td>
+                <td>{{ job.status.succeeded }}</td>
+                <td style="white-space: nowrap;">
+                    <button class="btn btn-info btn-sm" onclick="openDescribe('job', '{{ job.metadata.namespace }}', '{{ job.metadata.name }}')">Describe</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Kubernetes StatefulSets{% endblock %}
+
+{% block head %}
+    <script>
+        function openDescribe(resourceType, namespace, name) {
+            window.open(`/describe/${resourceType}/${namespace}/${name}`, '_blank', 'height=600,width=800');
+        }
+        function confirmRolloutRestart(namespace, name) {
+            if (confirm(`Are you sure you want to rollout restart statefulset ${name} in namespace ${namespace}?`)) {
+                fetch(`/rollout_restart_statefulset/${namespace}/${name}`, {
+                    method: 'POST',
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error restarting statefulset.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Error restarting statefulset.');
+                });
+            }
+        }
+        function confirmDelete(namespace, name) {
+            if (confirm(`Are you sure you want to delete statefulset ${name} in namespace ${namespace}? This action cannot be undone.`)) {
+                fetch(`/delete_statefulset/${namespace}/${name}`, {
+                    method: 'POST',
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error deleting statefulset.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting statefulset.');
+                });
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Kubernetes StatefulSets</h1>
+    <form class="row g-3 align-items-center mb-3" method="GET" action="/statefulsets">
+        <div class="col-auto">
+            <label for="search" class="visually-hidden">Search</label>
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query if search_query else '' }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Namespace</th>
+                <th>StatefulSet Name</th>
+                <th>Replicas</th>
+                <th>Ready Replicas</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for statefulset in statefulsets %}
+            <tr>
+                <td>{{ statefulset.metadata.namespace }}</td>
+                <td>{{ statefulset.metadata.name }}</td>
+                <td>{{ statefulset.spec.replicas }}</td>
+                <td>{{ statefulset.status.ready_replicas }}</td>
+                <td style="white-space: nowrap;">
+                    <button class="btn btn-info btn-sm" onclick="openDescribe('statefulset', '{{ statefulset.metadata.namespace }}', '{{ statefulset.metadata.name }}')">Describe</button>
+                    <button class="btn btn-warning btn-sm" onclick="confirmRolloutRestart('{{ statefulset.metadata.namespace }}', '{{ statefulset.metadata.name }}')">Rollout Restart</button>
+                    <button class="btn btn-danger btn-sm" onclick="confirmDelete('{{ statefulset.metadata.namespace }}', '{{ statefulset.metadata.name }}')">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

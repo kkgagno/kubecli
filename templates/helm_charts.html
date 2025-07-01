@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Kubernetes Helm Charts{% endblock %}
+
+{% block head %}
+    <script>
+        function openHelmChartResources(namespace, name) {
+            window.open(`/helm_chart_resources/${namespace}/${name}`, '_blank', 'height=600,width=800');
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Kubernetes Helm Charts</h1>
+    <form class="row g-3 align-items-center mb-3" method="GET" action="/helm_charts">
+        <div class="col-auto">
+            <label for="search" class="visually-hidden">Search</label>
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query if search_query else '' }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Namespace</th>
+                <th>Chart</th>
+                <th>Status</th>
+                <th>Resources</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chart in helm_charts %}
+            <tr>
+                <td>{{ chart.name }}</td>
+                <td>{{ chart.namespace }}</td>
+                <td>{{ chart.chart }}</td>
+                <td>{{ chart.status }}</td>
+                <td>
+                    <button class="btn btn-info btn-sm" onclick="openHelmChartResources('{{ chart.namespace }}', '{{ chart.name }}')">View Resources</button>
+                </td>
+                <td style="white-space: nowrap;">
+                    <form action="{{ url_for('delete_helm_chart', namespace=chart.namespace, name=chart.name) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this helm chart?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

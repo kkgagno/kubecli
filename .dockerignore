@@ -1,0 +1,16 @@
+.git
+.gitignore
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.idea
+.vscode
+README.md
+simple_kube_web_app_backup.zip
+simple_kube_web_app_BKUP
+*.log
+app.out
+app.err

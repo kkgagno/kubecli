@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Kubernetes Services{% endblock %}
+
+{% block head %}
+    <script>
+        function openDescribe(resourceType, namespace, name) {
+            window.open(`/describe/${resourceType}/${namespace}/${name}`, '_blank', 'height=600,width=800');
+        }
+        function confirmDelete(namespace, name) {
+            if (confirm(`Are you sure you want to delete service ${name} in namespace ${namespace}? This action cannot be undone.`)) {
+                fetch(`/delete_service/${namespace}/${name}`, {
+                    method: 'POST',
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error deleting service.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting service.');
+                });
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Kubernetes Services</h1>
+    <form class="row g-3 align-items-center mb-3" method="GET" action="/services">
+        <div class="col-auto">
+            <label for="search" class="visually-hidden">Search</label>
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query if search_query else '' }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Namespace</th>
+                <th>Service Name</th>
+                <th>Cluster IP</th>
+                <th>Ports</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td>{{ service.metadata.namespace }}</td>
+                <td>{{ service.metadata.name }}</td>
+                <td>{{ service.spec.cluster_ip }}</td>
+                <td>
+                    {% for port in service.spec.ports %}
+                        {{ port.port }}:{{ port.target_port }} ({{ port.protocol }})
+                    {% endfor %}
+                </td>
+                <td style="white-space: nowrap;">
+                    <button class="btn btn-info btn-sm" onclick="openDescribe('service', '{{ service.metadata.namespace }}', '{{ service.metadata.name }}')">Describe</button>
+                    <button class="btn btn-danger btn-sm" onclick="confirmDelete('{{ service.metadata.namespace }}', '{{ service.metadata.name }}')">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

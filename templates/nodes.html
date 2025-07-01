@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Kubernetes Nodes{% endblock %}
+
+{% block head %}
+    <style>
+        .btn:disabled {
+            background-color: #d3d3d3;
+            cursor: not-allowed;
+        }
+    </style>
+    <script>
+        function openDescribe(resourceType, namespace, name) {
+            window.open(`/describe/${resourceType}/${namespace}/${name}`, '_blank', 'height=600,width=800');
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Kubernetes Nodes</h1>
+    <form class="row g-3 align-items-center mb-3" method="GET" action="/nodes">
+        <div class="col-auto">
+            <label for="search" class="visually-hidden">Search</label>
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query if search_query else '' }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Node Name</th>
+                <th>Status</th>
+                <th>Roles</th>
+                <th>OS Image</th>
+                <th>Last Reboot(minutes)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for node in nodes %}
+            <tr>
+                <td>{{ node.metadata.name }}</td>
+                <td>
+                    {{ node.status_display }}
+                </td>
+                <td>
+                    {% for label, value in node.metadata.labels.items() %}
+                        {% if 'node-role.kubernetes.io/' in label %}
+                            {{ label.split('/')[1] }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ node.status.node_info.os_image }}</td>
+                <td>{{ "%.2f"|format(node.minutes_since_reboot) }}</td>
+                <td style="white-space: nowrap;">
+                    <button class="btn btn-info btn-sm" onclick="openDescribe('node', '-', '{{ node.metadata.name }}')">Describe</button>
+                    <form action="{{ url_for('cordon_node', node_name=node.metadata.name) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to cordon this node?');">
+                        <button type="submit" class="btn btn-warning btn-sm" {% if node.spec.unschedulable %}disabled{% endif %}>Cordon & Drain</button>
+                    </form>
+                    <form action="{{ url_for('uncordon_node', node_name=node.metadata.name) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to uncordon this node?');">
+                        <button type="submit" class="btn btn-success btn-sm" {% if not node.spec.unschedulable %}disabled{% endif %}>Uncordon</button>
+                    </form>
+                    <form action="{{ url_for('reboot_node', node_name=node.metadata.name) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to reboot this node?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Reboot</button>
+                    </form>
+                    <a href="{{ url_for('check_reboot_required', node_name=node.metadata.name) }}" class="btn {% if node.reboot_required %}btn-warning{% else %}btn-secondary{% endif %} btn-sm">Check Reboot</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

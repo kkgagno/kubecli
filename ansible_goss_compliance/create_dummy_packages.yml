@@ -1,0 +1,57 @@
+---
+- name: Create dummy packages
+  hosts: mstr124
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: Install equivs
+      ansible.builtin.apt:
+        name: equivs
+        state: present
+
+    - name: Create dummy security package
+      ansible.builtin.copy:
+        content: |
+          Section: misc
+          Priority: optional
+          Standards-Version: 3.9.2
+
+          Package: dummy-security-update
+          Version: 1.0
+          Maintainer: Your Name <you@example.com>
+          Architecture: all
+          Description: a dummy security package
+        dest: /tmp/dummy-security-update.ctl
+
+    - name: Build dummy security package
+      ansible.builtin.command: equivs-build /tmp/dummy-security-update.ctl
+      args:
+        chdir: /tmp
+
+    - name: Install dummy security package
+      ansible.builtin.apt:
+        deb: /tmp/dummy-security-update_1.0_all.deb
+
+    - name: Create dummy non-security package
+      ansible.builtin.copy:
+        content: |
+          Section: misc
+          Priority: optional
+          Standards-Version: 3.9.2
+
+          Package: dummy-non-security-update
+          Version: 1.0
+          Maintainer: Your Name <you@example.com>
+          Architecture: all
+          Description: a dummy non-security package
+        dest: /tmp/dummy-non-security-update.ctl
+
+    - name: Build dummy non-security package
+      ansible.builtin.command: equivs-build /tmp/dummy-non-security-update.ctl
+      args:
+        chdir: /tmp
+
+    - name: Install dummy non-security package
+      ansible.builtin.apt:
+        deb: /tmp/dummy-non-security-update_1.0_all.deb

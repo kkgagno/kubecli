@@ -1,0 +1,397 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.122.190:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 183-943-378
+2025-07-01 04:08:33,502 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.122.182:5001
+2025-07-01 04:08:33,502 INFO [33mPress CTRL+C to quit[0m
+2025-07-01 04:08:36,629 INFO 192.168.122.1 - - [01/Jul/2025 04:08:36] "[32mGET /upgrade_status HTTP/1.1[0m" 302 -
+2025-07-01 04:08:36,635 INFO 192.168.122.1 - - [01/Jul/2025 04:08:36] "GET /login HTTP/1.1" 200 -
+2025-07-01 04:08:36,649 INFO 192.168.122.1 - - [01/Jul/2025 04:08:36] "[36mGET /static/gemini_logo.png HTTP/1.1[0m" 304 -
+2025-07-01 04:08:39,786 INFO 192.168.122.1 - - [01/Jul/2025 04:08:39] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-07-01 04:08:39,789 INFO 192.168.122.1 - - [01/Jul/2025 04:08:39] "[32mGET / HTTP/1.1[0m" 302 -
+2025-07-01 04:08:40,048 INFO 192.168.122.1 - - [01/Jul/2025 04:08:40] "GET /pods HTTP/1.1" 200 -
+2025-07-01 04:08:44,957 INFO 192.168.122.1 - - [01/Jul/2025 04:08:44] "GET /upgrade_status HTTP/1.1" 200 -
+2025-07-01 04:08:45,726 INFO 192.168.122.1 - - [01/Jul/2025 04:08:45] "[35m[1mPOST /run_upgrade_check_all HTTP/1.1[0m" 202 -
+2025-07-01 04:08:50,738 INFO 192.168.122.1 - - [01/Jul/2025 04:08:50] "GET /get_task_status/1b9ad9f6-af62-41e0-aed5-929b18efc754 HTTP/1.1" 200 -
+2025-07-01 04:08:55,737 INFO 192.168.122.1 - - [01/Jul/2025 04:08:55] "GET /get_task_status/1b9ad9f6-af62-41e0-aed5-929b18efc754 HTTP/1.1" 200 -
+2025-07-01 04:08:55,746 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:08:55,798 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:08:55,798 INFO Authentication (publickey) successful!
+2025-07-01 04:08:55,798 INFO Processing host: mstr124
+2025-07-01 04:08:56,828 INFO Upgradable packages for mstr124:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+W: Unable to read /etc/apt/apt.conf.d/50unattended-upgrades - open (13: Permission denied)
+W: Unable to read /etc/apt/sources.list.d/gemini-test.list - open (13: Permission denied)
+
+2025-07-01 04:08:59,986 INFO Security updates for mstr124:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=318324) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:08:59,986 INFO Parsed security updates for mstr124: []
+2025-07-01 04:08:59,987 INFO Parsed non-security updates for mstr124: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'sudo', 'current_version': 'upgradable from: 1.9.15p5-3ubuntu5', 'new_version': '1.9.15p5-3ubuntu5.24.04.1'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:08:59,993 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:09:00,046 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:09:00,046 INFO Authentication (publickey) successful!
+2025-07-01 04:09:00,046 INFO Processing host: mstr224
+2025-07-01 04:09:00,315 INFO Upgradable packages for mstr224:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:09:02,967 INFO Security updates for mstr224:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=307472) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:09:02,967 INFO Parsed security updates for mstr224: []
+2025-07-01 04:09:02,967 INFO Parsed non-security updates for mstr224: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'sudo', 'current_version': 'upgradable from: 1.9.15p5-3ubuntu5', 'new_version': '1.9.15p5-3ubuntu5.24.04.1'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:09:02,973 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:09:03,027 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:09:03,027 INFO Authentication (publickey) successful!
+2025-07-01 04:09:03,027 INFO Processing host: mstr324
+2025-07-01 04:09:03,300 INFO Upgradable packages for mstr324:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:09:05,986 INFO Security updates for mstr324:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=301611) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:09:05,987 INFO Parsed security updates for mstr324: []
+2025-07-01 04:09:05,987 INFO Parsed non-security updates for mstr324: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'sudo', 'current_version': 'upgradable from: 1.9.15p5-3ubuntu5', 'new_version': '1.9.15p5-3ubuntu5.24.04.1'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:09:05,987 INFO Processing host: node1
+2025-07-01 04:09:06,198 INFO Upgradable packages for node1:
+Listing...
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:09:07,108 INFO Security updates for node1:
+
+2025-07-01 04:09:07,108 INFO Parsed security updates for node1: []
+2025-07-01 04:09:07,108 INFO Parsed non-security updates for node1: [{'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:09:07,115 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:09:07,167 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:09:07,167 INFO Authentication (publickey) successful!
+2025-07-01 04:09:07,168 INFO Processing host: wrkr124
+2025-07-01 04:09:08,231 INFO Upgradable packages for wrkr124:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+W: Unable to read /etc/apt/sources.list.d/gemini-test.list - open (13: Permission denied)
+
+2025-07-01 04:09:11,364 INFO Security updates for wrkr124:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=309089) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:09:11,364 INFO Parsed security updates for wrkr124: []
+2025-07-01 04:09:11,365 INFO Parsed non-security updates for wrkr124: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'sudo', 'current_version': 'upgradable from: 1.9.15p5-3ubuntu5', 'new_version': '1.9.15p5-3ubuntu5.24.04.1'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:09:11,372 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:09:11,425 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:09:11,426 INFO Authentication (publickey) successful!
+2025-07-01 04:09:11,426 INFO Processing host: wrkr224
+2025-07-01 04:09:11,695 INFO Upgradable packages for wrkr224:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:09:14,393 INFO Security updates for wrkr224:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=302598) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:09:14,394 INFO Parsed security updates for wrkr224: []
+2025-07-01 04:09:14,394 INFO Parsed non-security updates for wrkr224: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'sudo', 'current_version': 'upgradable from: 1.9.15p5-3ubuntu5', 'new_version': '1.9.15p5-3ubuntu5.24.04.1'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:09:14,401 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:09:14,452 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:09:14,452 INFO Authentication (publickey) successful!
+2025-07-01 04:09:14,452 INFO Processing host: wrkr324
+2025-07-01 04:09:14,715 INFO Upgradable packages for wrkr324:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:09:17,341 INFO Security updates for wrkr324:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=264469) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:09:17,341 INFO Parsed security updates for wrkr324: []
+2025-07-01 04:09:17,341 INFO Parsed non-security updates for wrkr324: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'sudo', 'current_version': 'upgradable from: 1.9.15p5-3ubuntu5', 'new_version': '1.9.15p5-3ubuntu5.24.04.1'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:09:17,342 INFO 192.168.122.1 - - [01/Jul/2025 04:09:17] "GET /get_all_updates HTTP/1.1" 200 -
+2025-07-01 04:10:19,202 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.122.182:5001
+2025-07-01 04:10:19,202 INFO [33mPress CTRL+C to quit[0m
+2025-07-01 04:10:21,567 INFO 192.168.122.1 - - [01/Jul/2025 04:10:21] "[32mGET /upgrade_status HTTP/1.1[0m" 302 -
+2025-07-01 04:10:21,574 INFO 192.168.122.1 - - [01/Jul/2025 04:10:21] "GET /login HTTP/1.1" 200 -
+2025-07-01 04:10:21,588 INFO 192.168.122.1 - - [01/Jul/2025 04:10:21] "[36mGET /static/gemini_logo.png HTTP/1.1[0m" 304 -
+2025-07-01 04:10:23,862 INFO 192.168.122.1 - - [01/Jul/2025 04:10:23] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-07-01 04:10:23,865 INFO 192.168.122.1 - - [01/Jul/2025 04:10:23] "[32mGET / HTTP/1.1[0m" 302 -
+2025-07-01 04:10:24,137 INFO 192.168.122.1 - - [01/Jul/2025 04:10:24] "GET /pods HTTP/1.1" 200 -
+2025-07-01 04:10:31,403 INFO 192.168.122.1 - - [01/Jul/2025 04:10:31] "GET /upgrade_status HTTP/1.1" 200 -
+2025-07-01 04:10:45,672 INFO 192.168.122.1 - - [01/Jul/2025 04:10:45] "[35m[1mPOST /run_upgrade_check_all HTTP/1.1[0m" 202 -
+2025-07-01 04:10:50,678 INFO 192.168.122.1 - - [01/Jul/2025 04:10:50] "GET /get_task_status/db1d5bf0-f9d2-4a5a-8d12-5a497886b437 HTTP/1.1" 200 -
+2025-07-01 04:10:55,678 INFO 192.168.122.1 - - [01/Jul/2025 04:10:55] "GET /get_task_status/db1d5bf0-f9d2-4a5a-8d12-5a497886b437 HTTP/1.1" 200 -
+2025-07-01 04:11:00,677 INFO 192.168.122.1 - - [01/Jul/2025 04:11:00] "GET /get_task_status/db1d5bf0-f9d2-4a5a-8d12-5a497886b437 HTTP/1.1" 200 -
+2025-07-01 04:11:00,686 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:11:00,738 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:11:00,738 INFO Authentication (publickey) successful!
+2025-07-01 04:11:00,738 INFO Processing host: mstr124
+2025-07-01 04:11:01,847 INFO Upgradable packages for mstr124:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+W: Unable to read /etc/apt/apt.conf.d/50unattended-upgrades - open (13: Permission denied)
+W: Unable to read /etc/apt/sources.list.d/gemini-test.list - open (13: Permission denied)
+
+2025-07-01 04:11:05,229 INFO Security updates for mstr124:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=318659) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:11:05,229 INFO Parsed security updates for mstr124: ['sudo']
+2025-07-01 04:11:05,229 INFO Parsed non-security updates for mstr124: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:11:05,237 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:11:05,290 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:11:05,290 INFO Authentication (publickey) successful!
+2025-07-01 04:11:05,291 INFO Processing host: mstr224
+2025-07-01 04:11:05,575 INFO Upgradable packages for mstr224:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:11:08,601 INFO Security updates for mstr224:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=307826) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:11:08,601 INFO Parsed security updates for mstr224: ['sudo']
+2025-07-01 04:11:08,601 INFO Parsed non-security updates for mstr224: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:11:08,608 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:11:08,662 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:11:08,662 INFO Authentication (publickey) successful!
+2025-07-01 04:11:08,662 INFO Processing host: mstr324
+2025-07-01 04:11:08,949 INFO Upgradable packages for mstr324:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:11:11,903 INFO Security updates for mstr324:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=301961) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:11:11,903 INFO Parsed security updates for mstr324: ['sudo']
+2025-07-01 04:11:11,903 INFO Parsed non-security updates for mstr324: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:11:11,903 INFO Processing host: node1
+2025-07-01 04:11:12,155 INFO Upgradable packages for node1:
+Listing...
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:11:13,160 INFO Security updates for node1:
+
+2025-07-01 04:11:13,160 INFO Parsed security updates for node1: []
+2025-07-01 04:11:13,160 INFO Parsed non-security updates for node1: [{'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:11:13,167 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:11:13,220 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:11:13,220 INFO Authentication (publickey) successful!
+2025-07-01 04:11:13,220 INFO Processing host: wrkr124
+2025-07-01 04:11:14,352 INFO Upgradable packages for wrkr124:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+W: Unable to read /etc/apt/sources.list.d/gemini-test.list - open (13: Permission denied)
+
+2025-07-01 04:11:17,742 INFO Security updates for wrkr124:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=309446) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:11:17,742 INFO Parsed security updates for wrkr124: ['sudo']
+2025-07-01 04:11:17,742 INFO Parsed non-security updates for wrkr124: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:11:17,750 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:11:17,802 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:11:17,802 INFO Authentication (publickey) successful!
+2025-07-01 04:11:17,802 INFO Processing host: wrkr224
+2025-07-01 04:11:18,071 INFO Upgradable packages for wrkr224:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:11:20,814 INFO Security updates for wrkr224:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=302951) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:11:20,814 INFO Parsed security updates for wrkr224: ['sudo']
+2025-07-01 04:11:20,814 INFO Parsed non-security updates for wrkr224: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:11:20,821 INFO Connected (version 2.0, client OpenSSH_9.6p1)
+2025-07-01 04:11:20,872 INFO Auth banner: b'# -----------------------------------------------------------------------------\n# WARNING: Unauthorized Access Prohibited\n# -----------------------------------------------------------------------------\n# This system is for the exclusive use of authorized users associated with\n# Nimbix/Eviden/Atos. All activities on this system are monitored and recorded.\n# By accessing this system, you agree to comply with all applicable laws,\n# regulations, and organizational policies.\n#\n# If you are not an authorized user, disconnect immediately. Unauthorized\n# access may result in disciplinary action, legal consequences, or both.\n#\n# Authorized users must ensure their actions comply with security protocols and\n# report any suspicious activity immediately to the system administrator.\n# -----------------------------------------------------------------------------\n'
+2025-07-01 04:11:20,872 INFO Authentication (publickey) successful!
+2025-07-01 04:11:20,872 INFO Processing host: wrkr324
+2025-07-01 04:11:21,143 INFO Upgradable packages for wrkr324:
+Listing...
+fwupd/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+libfwupd2/noble-updates 1.9.30-0ubuntu1~24.04.1 amd64 [upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1]
+linux-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-headers-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-image-generic/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-libc-dev/noble-updates 6.8.0-63.66 amd64 [upgradable from: 6.8.0-62.65]
+linux-tools-common/noble-updates 6.8.0-63.66 all [upgradable from: 6.8.0-62.65]
+sudo/noble-updates,noble-security 1.9.15p5-3ubuntu5.24.04.1 amd64 [upgradable from: 1.9.15p5-3ubuntu5]
+ubuntu-drivers-common/noble-updates 1:0.9.7.6ubuntu3.2 amd64 [upgradable from: 1:0.9.7.6ubuntu3]
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+
+2025-07-01 04:11:23,999 INFO Security updates for wrkr324:
+/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=264824) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+/usr/bin/dpkg --status-fd 10 --no-triggers --unpack --auto-deconfigure /var/cache/apt/archives/sudo_1.9.15p5-3ubuntu5.24.04.1_amd64.deb 
+/usr/bin/dpkg --status-fd 10 --configure --pending 
+
+2025-07-01 04:11:23,999 INFO Parsed security updates for wrkr324: ['sudo']
+2025-07-01 04:11:23,999 INFO Parsed non-security updates for wrkr324: [{'name': 'fwupd', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'libfwupd2', 'current_version': 'upgradable from: 1.9.29-0ubuntu1~24.04.1ubuntu1', 'new_version': '1.9.30-0ubuntu1~24.04.1'}, {'name': 'linux-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-headers-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-image-generic', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-libc-dev', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'linux-tools-common', 'current_version': 'upgradable from: 6.8.0-62.65', 'new_version': '6.8.0-63.66'}, {'name': 'ubuntu-drivers-common', 'current_version': 'upgradable from: 1:0.9.7.6ubuntu3', 'new_version': '1:0.9.7.6ubuntu3.2'}]
+2025-07-01 04:11:23,999 INFO 192.168.122.1 - - [01/Jul/2025 04:11:23] "GET /get_all_updates HTTP/1.1" 200 -

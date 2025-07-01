@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Security Updates Result</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sortable-header {
+            cursor: pointer;
+        }
+        .sortable-header:hover {
+            text-decoration: underline;
+        }
+        .sortable-header::after {
+            display: inline-block;
+            margin-left: 0.5em;
+        }
+        .sortable-header.asc::after {
+            content: "▲";
+        }
+        .sortable-header.desc::after {
+            content: "▼";
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Non-Security Patch Updates for {{ hostname }}</h1>
+
+        {% if packages %}
+            <div class="mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search packages...">
+            </div>
+            <table class="table table-bordered table-striped" id="packagesTable">
+                <thead>
+                    <tr>
+                        <th class="sortable-header" data-sort="name">Package Name</th>
+                        <th class="sortable-header" data-sort="current_version">Current Version</th>
+                        <th class="sortable-header" data-sort="new_version">Target Version</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for package in packages %}
+                        <tr>
+                            <td>{{ package.name }}</td>
+                            <td>{{ package.current_version }}</td>
+                            <td>{{ package.new_version }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% elif raw_output.strip() %}
+            <div class="alert alert-warning" role="alert">
+                Could not parse package list, showing raw output:<br>
+                <pre>{{ raw_output }}</pre>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                No non-security patch updates found for {{ hostname }}.
+            </div>
+        {% endif %}
+        <a href="{{ url_for('upgrade_status') }}" class="btn btn-primary">Back to Upgrade Status</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const packagesTable = document.getElementById('packagesTable');
+            const tableBody = packagesTable ? packagesTable.querySelector('tbody') : null;
+            const tableRows = tableBody ? Array.from(tableBody.querySelectorAll('tr')) : [];
+            const headers = packagesTable ? packagesTable.querySelectorAll('.sortable-header') : [];
+
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    tableRows.forEach(row => {
+                        const rowText = row.textContent.toLowerCase();
+                        row.style.display = rowText.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    const sortKey = this.dataset.sort;
+                    const isAsc = this.classList.contains('asc');
+                    const direction = isAsc ? 'desc' : 'asc';
+
+                    // Remove existing sort classes
+                    headers.forEach(h => {
+                        h.classList.remove('asc', 'desc');
+                    });
+
+                    // Add new sort class
+                    this.classList.add(direction);
+
+                    sortRows(sortKey, direction);
+                });
+            });
+
+            function sortRows(key, direction) {
+                const sortedRows = [...tableRows].sort((a, b) => {
+                    const aText = a.querySelector(`td:nth-child(${getColumnIndex(key)})`).textContent.trim().toLowerCase();
+                    const bText = b.querySelector(`td:nth-child(${getColumnIndex(key)})`).textContent.trim().toLowerCase();
+
+                    if (aText < bText) {
+                        return direction === 'asc' ? -1 : 1;
+                    }
+                    if (aText > bText) {
+                        return direction === 'asc' ? 1 : -1;
+                    }
+                    return 0;
+                });
+
+                // Append sorted rows to the table body
+                sortedRows.forEach(row => tableBody.appendChild(row));
+            }
+
+            function getColumnIndex(key) {
+                switch (key) {
+                    case 'name': return 1;
+                    case 'current_version': return 2;
+                    case 'new_version': return 3;
+                    default: return 1;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

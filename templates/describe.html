@@ -1,0 +1,9 @@
+{% extends 'base_simple.html' %}
+
+{% block title %}Describe Resource{% endblock %}
+
+{% block content %}
+    <h1>Resource YAML</h1>
+    <pre>{{ resource_yaml }}</pre>
+    <button class="btn btn-secondary" onclick="window.close()">Close</button>
+{% endblock %}

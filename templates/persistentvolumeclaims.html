@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Kubernetes Persistent Volume Claims{% endblock %}
+
+{% block head %}
+    <script>
+        function openDescribe(resourceType, namespace, name) {
+            window.open(`/describe/${resourceType}/${namespace}/${name}`, '_blank', 'height=600,width=800');
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Kubernetes Persistent Volume Claims</h1>
+    <form class="row g-3 align-items-center mb-3" method="GET" action="/persistentvolumeclaims">
+        <div class="col-auto">
+            <label for="search" class="visually-hidden">Search</label>
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query if search_query else '' }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Namespace</th>
+                <th>PVC Name</th>
+                <th>Status</th>
+                <th>Volume</th>
+                <th>Capacity</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pvc in pvcs %}
+            <tr>
+                <td>{{ pvc.metadata.namespace }}</td>
+                <td>{{ pvc.metadata.name }}</td>
+                <td>{{ pvc.status.phase }}</td>
+                <td>{{ pvc.spec.volume_name }}</td>
+                <td>{{ pvc.status.capacity.storage }}</td>
+                <td style="white-space: nowrap;">
+                    <button class="btn btn-info btn-sm" onclick="openDescribe('persistentvolumeclaim', '{{ pvc.metadata.namespace }}', '{{ pvc.metadata.name }}')">Describe</button>
+                    <form action="{{ url_for('delete_pvc', namespace=pvc.metadata.namespace, name=pvc.metadata.name) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this PVC?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

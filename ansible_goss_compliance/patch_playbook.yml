@@ -1,0 +1,38 @@
+- name: Apply Patches to Host
+  hosts: all
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: Apply security patches
+      ansible.builtin.command: sudo unattended-upgrades
+      register: security_patch_result
+      when: patch_type == 'security'
+      changed_when: false
+
+    - name: Apply non-security patches
+      block:
+        - name: Update apt cache
+          ansible.builtin.apt:
+            update_cache: yes
+        - name: Perform distribution upgrade
+          ansible.builtin.apt:
+            upgrade: dist
+            autoremove: yes
+          register: non_security_patch_result
+      when: patch_type == 'non-security'
+      
+    - name: Display security patch results
+      ansible.builtin.debug:
+        msg: "No security updates available."
+      when: security_patch_result is defined and security_patch_result.stdout_lines | length == 0
+
+    - name: Display security patch results
+      ansible.builtin.debug:
+        var: security_patch_result.stdout_lines
+      when: security_patch_result is defined and security_patch_result.stdout_lines | length > 0
+
+    - name: Display non-security patch results
+      ansible.builtin.debug:
+        var: non_security_patch_result.stdout_lines
+      when: non_security_patch_result is defined

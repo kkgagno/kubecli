@@ -1,0 +1,171 @@
+---
+- name: Setup and Run Goss Compliance Scan
+  hosts: all:!endpoint:!node1
+  become: yes
+  timeout: 300
+  gather_facts: no
+  vars:
+    goss_version: "v0.4.4" # Specify the Goss version
+    goss_checksum_amd64: "sha256:a0123b456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" # Replace with actual checksum
+    goss_install_dir: "/usr/local/bin"
+    goss_tests_dir: "/etc/goss/tests"
+    goss_report_dir: "/var/log/goss_reports"
+
+  tasks:
+    - name: Manually gather facts
+      setup:
+    - name: Create Goss directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "{{ goss_tests_dir }}"
+        - "{{ goss_report_dir }}"
+
+    - name: Get Goss binary checksum (for amd64)
+      ansible.builtin.uri:
+        url: "https://github.com/aelsabbahy/goss/releases/download/{{ goss_version }}/goss-linux-amd64.sha256"
+        return_content: yes
+      register: goss_checksum_content
+      delegate_to: localhost
+      run_once: true
+
+    - name: Set goss_checksum_amd64 fact
+      ansible.builtin.set_fact:
+        goss_checksum_amd64: "{{ goss_checksum_content.content.split(' ')[0] }}"
+      when: goss_checksum_content.content is defined
+      run_once: true
+
+    - name: Download and install Goss
+      ansible.builtin.get_url:
+        url: "https://github.com/aelsabbahy/goss/releases/download/{{ goss_version }}/goss-linux-amd64"
+        dest: "{{ goss_install_dir }}/goss"
+        mode: '0755'
+        checksum: "sha256:{{ goss_checksum_amd64 }}"
+      when: goss_checksum_amd64 is defined and goss_checksum_amd64 != "sha256:a0123b456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Distribute Goss test files
+      ansible.builtin.copy:
+        src: goss_tests/
+        dest: "{{ goss_tests_dir }}/"
+        mode: '0644'
+
+    - name: Distribute Goss variables file
+      ansible.builtin.copy:
+        src: goss-vars.yml
+        dest: "{{ goss_tests_dir }}/goss-vars.yml"
+        mode: '0644'
+
+    - name: Set /etc/shadow permissions
+      ansible.builtin.file:
+        path: /etc/shadow
+        mode: '0400'
+
+    - name: Run Goss tests and save JSON report
+      ansible.builtin.command: "{{ goss_install_dir }}/goss --gossfile {{ goss_tests_dir }}/goss.yml --vars {{ goss_tests_dir }}/goss-vars.yml validate --format json --format-options pretty"
+      register: goss_result
+      changed_when: false
+      ignore_errors: true
+
+    - name: Debug Goss result
+      ansible.builtin.debug:
+        msg:
+          - "Goss stdout: {{ goss_result.stdout }}"
+          - "Goss stderr: {{ goss_result.stderr }}"
+          - "Goss rc: {{ goss_result.rc }}"
+
+    - name: Save Goss JSON report to file
+      ansible.builtin.copy:
+        content: "{{ goss_result.stdout }}"
+        dest: "{{ goss_report_dir }}/{{ ansible_hostname }}_goss_report.json"
+        mode: '0644'
+
+    - name: Fetch Goss JSON report from remote to local
+      ansible.builtin.fetch:
+        src: "{{ goss_report_dir }}/{{ ansible_hostname }}_goss_report.json"
+        dest: "/tmp/goss_reports/"
+        flat: yes # Save directly in goss_reports/ without hostname subdirectory
+
+- name: Generate Individual HTML reports
+  hosts: localhost
+  connection: local
+  tags: report
+  vars:
+    local_goss_reports_dir: "/tmp/goss_reports"
+    html_report_output_dir: "~/goss_reports"
+  tasks:
+    - name: Create HTML report directory
+      ansible.builtin.file:
+        path: "{{ html_report_output_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Find all Goss JSON reports
+      ansible.builtin.find:
+        paths: "{{ local_goss_reports_dir }}"
+        patterns: "*_goss_report.json"
+      register: json_reports
+
+    - name: Generate HTML report for each host
+      ansible.builtin.template:
+        src: templates/compliance_report.j2
+        dest: "{{ html_report_output_dir }}/{{ item.path | basename | regex_replace('_goss_report.json', '.html') }}"
+      loop: "{{ json_reports.files }}"
+      vars:
+        report: "{{ lookup('file', item.path) | from_json }}"
+        hostname: "{{ item.path | basename | regex_replace('_goss_report.json', '') }}"
+      when: json_reports.files is defined and json_reports.files | length > 0
+
+- name: Generate Aggregated HTML Compliance Report
+  hosts: localhost
+  connection: local
+  tags: report
+  vars:
+    local_goss_reports_dir: "/tmp/goss_reports"
+    html_report_output_dir: "~/goss_reports"
+    aggregated_report_data: []
+
+  tasks:
+    - name: Create local HTML report directory
+      ansible.builtin.file:
+        path: "{{ html_report_output_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Find all Goss JSON reports
+      ansible.builtin.find:
+        paths: "{{ local_goss_reports_dir }}"
+        patterns: "*_goss_report.json"
+      register: json_reports
+
+    - name: Aggregate JSON reports
+      ansible.builtin.set_fact:
+        aggregated_report_data: "{{ aggregated_report_data + [{ 'hostname': item.path | basename | regex_replace('_goss_report.json', ''), 'report': lookup('file', item.path) | from_json }] }}"
+      loop: "{{ json_reports.files }}"
+      when: json_reports.files is defined and json_reports.files | length > 0
+
+    - name: Generate Aggregated HTML report
+      ansible.builtin.template:
+        src: templates/aggregated_compliance_report.j2
+        dest: "{{ html_report_output_dir }}/aggregated_compliance_report.html"
+      vars:
+        reports: "{{ aggregated_report_data }}"
+      when: aggregated_report_data | length > 0
+
+- name: Serve Compliance Reports
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Start web server
+      ansible.builtin.command: python3 web_server.py &
+      args:
+        chdir: "{{ lookup('env', 'HOME') }}/ansible_goss_compliance"
+      async: 43200 # Run for 12 hours
+      poll: 0 # Don't wait for the command to complete
+      register: web_server_task

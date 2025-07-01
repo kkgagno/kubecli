@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-kube-web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-kube-web-app
+  template:
+    metadata:
+      labels:
+        app: simple-kube-web-app
+    spec:
+      containers:
+      - name: simple-kube-web-app
+        image: simple-kube-web-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5001
