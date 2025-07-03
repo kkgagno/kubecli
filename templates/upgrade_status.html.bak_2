@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Upgrade Status{% endblock %}
+
+{% block content %}
+    <h1>Upgrade Status</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="hosts-table-body">
+            {% for host in hosts_list %}
+            {% if host != 'nginx' and 'endpoint' not in host %}
+            <tr id="host-row-{{ host }}">
+                <td>{{ host }}</td>
+                <td id="status-{{ host }}">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Checking...
+                </td>
+                <td class="text-center" style="white-space: nowrap;">
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-hostname="{{ host }}" data-update-type="security" data-title="Security Updates for {{ host }}">
+                        Security Updates
+                    </button>
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-hostname="{{ host }}" data-update-type="other" data-title="Other Updates for {{ host }}">
+                        Other Updates
+                    </button>
+                    <form action="{{ url_for('run_patch', hostname=host, patch_type='security') }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to patch security updates for {{ host }}?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Patch Security</button>
+                    </form>
+                    <form action="{{ url_for('run_patch', hostname=host, patch_type='non-security') }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to patch non-security updates for {{ host }}?');">
+                        <button type="submit" class="btn btn-warning btn-sm">Patch Non-Security</button>
+                    </form>
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const hosts = {{ hosts_list | tojson }};
+    const hostDataCache = {};
+
+    hosts.forEach(host => {
+        if (host === 'nginx' || host.includes('endpoint')) {
+            return;
+        }
+        
+        const statusCell = document.getElementById(`status-${host}`);
+        if (!statusCell) return;
+
+        fetch(`/get_all_updates_for_host/${host}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                hostDataCache[host] = data;
+                if (data.status === 'Patches needed') {
+                    statusCell.innerHTML = `<span class="badge bg-danger">${data.status}</span>`;
+                } else if (data.status === 'No patches needed') {
+                    statusCell.innerHTML = `<span class="badge bg-success">${data.status}</span>`;
+                } else {
+                    statusCell.innerHTML = `<span class="badge bg-warning">${data.status}</span>`;
+                }
+            })
+            .catch(error => {
+                console.error(`Error fetching status for ${host}:`, error);
+                statusCell.innerHTML = `<span class="badge bg-secondary">Error</span>`;
+            });
+    });
+
+    var describeModal = document.getElementById('describeModal');
+    if (describeModal) {
+        describeModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var hostname = button.getAttribute('data-hostname');
+            var updateType = button.getAttribute('data-update-type');
+            var title = button.getAttribute('data-title');
+
+            var modalTitle = describeModal.querySelector('.modal-title');
+            var modalBody = describeModal.querySelector('#modal-content-body');
+
+            modalTitle.textContent = title;
+            
+            const data = hostDataCache[hostname];
+            if (data) {
+                const updates = (updateType === 'security') ? data.security_updates : data.other_updates;
+                if(updates && Array.isArray(updates) && updates.length > 0) {
+                    let content = '<ul>';
+                    updates.forEach(item => {
+                        if(typeof item === 'object' && item !== null && 'name' in item) {
+                            content += `<li>${item.name} (New: ${item.new_version}, Current: ${item.current_version})</li>`;
+                        } else {
+                            content += `<li>${item}</li>`;
+                        }
+                    });
+                    content += '</ul>';
+                    modalBody.innerHTML = content;
+                } else {
+                    modalBody.textContent = 'No updates found.';
+                }
+            } else {
+                modalBody.textContent = 'Loading...';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

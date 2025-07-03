@@ -1,0 +1,176 @@
+/* styles.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+    background: #161a25;
+    color: #e0e0e0;
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+}
+
+.sidebar {
+    width: 250px;
+    background: #1f2333;
+    border-right: 2px solid #00c4a3;
+    box-shadow: 4px 0 8px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-brand {
+    color: #00c4a3 !important;
+    font-weight: 700;
+    font-size: 1.5em;
+    text-align: center;
+    margin-bottom: 20px;
+    text-decoration: none;
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+    width: calc(100% - 250px);
+    overflow-y: auto;
+}
+
+.nav-link {
+    color: #bdc3c7 !important;
+    transition: all 0.3s ease;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #00c4a3 !important;
+    background-color: #2a2f45;
+}
+
+.table {
+    background-color: #1f2333;
+    color: #e0e0e0;
+    border: 1px solid #00c4a3;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background: #2a2f45;
+    color: #00c4a3;
+    border-bottom: 2px solid #00c4a3;
+    text-transform: uppercase;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #2a2f45;
+    transition: background-color 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #2a2f45;
+}
+
+.alert {
+    border-radius: 5px;
+    border-left: 5px solid;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.alert-success {
+    background-color: #2ecc71;
+    color: #fff;
+    border-color: #27ae60;
+}
+
+.alert-danger {
+    background-color: #e74c3c;
+    color: #fff;
+    border-color: #c0392b;
+}
+
+.alert-warning {
+    background-color: #f39c12;
+    color: #fff;
+    border-color: #d35400;
+}
+
+.alert-info {
+    background-color: #3498db;
+    color: #fff;
+    border-color: #2980b9;
+}
+
+.form-control {
+    background-color: #1f2333;
+    color: #e0e0e0;
+    border: 1px solid #2a2f45;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: #2a2f45;
+    color: #e0e0e0;
+    border-color: #00c4a3;
+    box-shadow: 0 0 10px rgba(0, 196, 163, 0.5);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #00c4a3;
+    text-transform: uppercase;
+}
+
+a {
+    color: #00c4a3;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #00a286;
+}
+
+.card {
+    background: #1f2333;
+    border: 1px solid #00c4a3;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+}
+
+.card-header {
+    background: #2a2f45;
+    color: #00c4a3;
+    border-bottom: 1px solid #00c4a3;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.modal-content {
+    background: #1f2333;
+    border: 1px solid #00c4a3;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+}
+
+.modal-header {
+    border-bottom: 1px solid #00c4a3;
+    color: #00c4a3;
+}
+
+.modal-footer {
+    border-top: 1px solid #00c4a3;
+}
+
+.close {
+    color: #fff;
+    text-shadow: 0 0 5px #000;
+}

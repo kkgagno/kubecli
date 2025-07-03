@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Archived Compliance Reports{% endblock %}
+
+{% block content %}
+    <h1>Archived Compliance Reports</h1>
+    <a href="{{ url_for('compliance_reports') }}" class="btn btn-primary mb-3">Back to Compliance Reports</a>
+    <ul class="list-group">
+        {% for report in archived_reports %}
+            <li class="list-group-item">
+                <a href="{{ url_for('view_archived_report', report_name=report) }}">{{ report }}</a>
+            </li>
+        {% else %}
+            <li class="list-group-item">No archived reports found.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

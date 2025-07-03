@@ -1,0 +1,241 @@
+Could not figure out development release: Distribution data outdated. Please check for an update for distro-info-data. See /usr/share/doc/distro-info-data/README.Debian for details.
+Starting unattended upgrades script
+Allowed origins are: o=Ubuntu,a=focal, o=Ubuntu,a=focal-security, o=UbuntuESMApps,a=focal-apps-security, o=UbuntuESM,a=focal-infra-security
+Initial blacklist: 
+Initial whitelist (not strict): 
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-backports_universe_i18n_Translation-en'  a=focal-backports,c=universe,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=54888 ID:19> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-backports_universe_binary-amd64_Packages'  a=focal-backports,c=universe,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=109755 ID:18> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-backports_main_i18n_Translation-en'  a=focal-backports,c=main,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=143564 ID:17> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-backports_main_binary-amd64_Packages'  a=focal-backports,c=main,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=262684 ID:16> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_multiverse_i18n_Translation-en'  a=focal-updates,c=multiverse,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=47624 ID:15> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_multiverse_binary-amd64_Packages'  a=focal-updates,c=multiverse,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=178704 ID:14> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_universe_i18n_Translation-en'  a=focal-updates,c=universe,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=2685470 ID:13> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_universe_binary-amd64_Packages'  a=focal-updates,c=universe,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=7156039 ID:12> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_restricted_i18n_Translation-en'  a=focal-updates,c=restricted,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=10829850 ID:11> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_restricted_binary-amd64_Packages'  a=focal-updates,c=restricted,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=23666306 ID:10> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_main_i18n_Translation-en'  a=focal-updates,c=main,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=15856198 ID:9> with -32768 pin
+Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_main_binary-amd64_Packages'  a=focal-updates,c=main,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=22165510 ID:8> with -32768 pin
+Applying pinning: PkgFilePin(id=19, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-backports_universe_i18n_Translation-en'  a=focal-backports,c=universe,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=54888 ID:19>
+Applying pinning: PkgFilePin(id=18, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-backports_universe_binary-amd64_Packages'  a=focal-backports,c=universe,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=109755 ID:18>
+Applying pinning: PkgFilePin(id=17, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-backports_main_i18n_Translation-en'  a=focal-backports,c=main,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=143564 ID:17>
+Applying pinning: PkgFilePin(id=16, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-backports_main_binary-amd64_Packages'  a=focal-backports,c=main,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=262684 ID:16>
+Applying pinning: PkgFilePin(id=15, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_multiverse_i18n_Translation-en'  a=focal-updates,c=multiverse,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=47624 ID:15>
+Applying pinning: PkgFilePin(id=14, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_multiverse_binary-amd64_Packages'  a=focal-updates,c=multiverse,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=178704 ID:14>
+Applying pinning: PkgFilePin(id=13, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_universe_i18n_Translation-en'  a=focal-updates,c=universe,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=2685470 ID:13>
+Applying pinning: PkgFilePin(id=12, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_universe_binary-amd64_Packages'  a=focal-updates,c=universe,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=7156039 ID:12>
+Applying pinning: PkgFilePin(id=11, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_restricted_i18n_Translation-en'  a=focal-updates,c=restricted,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=10829850 ID:11>
+Applying pinning: PkgFilePin(id=10, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_restricted_binary-amd64_Packages'  a=focal-updates,c=restricted,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=23666306 ID:10>
+Applying pinning: PkgFilePin(id=9, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_main_i18n_Translation-en'  a=focal-updates,c=main,v=20.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=15856198 ID:9>
+Applying pinning: PkgFilePin(id=8, priority=-32768)
+Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_focal-updates_main_binary-amd64_Packages'  a=focal-updates,c=main,v=20.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=22165510 ID:8>
+Using (^linux-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^kfreebsd-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^gnumach-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-modules-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-kernel-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^linux-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^kfreebsd-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^gnumach-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-modules-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-kernel-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$) regexp to find kernel packages
+Using (^linux-.*-5\.4\.0\-216\-generic$|^linux-.*-5\.4\.0\-216$|^kfreebsd-.*-5\.4\.0\-216\-generic$|^kfreebsd-.*-5\.4\.0\-216$|^gnumach-.*-5\.4\.0\-216\-generic$|^gnumach-.*-5\.4\.0\-216$|^.*-modules-5\.4\.0\-216\-generic$|^.*-modules-5\.4\.0\-216$|^.*-kernel-5\.4\.0\-216\-generic$|^.*-kernel-5\.4\.0\-216$|^linux-.*-5\.4\.0\-216\-generic$|^linux-.*-5\.4\.0\-216$|^kfreebsd-.*-5\.4\.0\-216\-generic$|^kfreebsd-.*-5\.4\.0\-216$|^gnumach-.*-5\.4\.0\-216\-generic$|^gnumach-.*-5\.4\.0\-216$|^.*-modules-5\.4\.0\-216\-generic$|^.*-modules-5\.4\.0\-216$|^.*-kernel-5\.4\.0\-216\-generic$|^.*-kernel-5\.4\.0\-216$) regexp to find running kernel packages
+Checking: apt ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: apt=2.0.9
+Checking: apt-utils ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: apt-utils=2.0.9
+Checking: base-files ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: base-files=11ubuntu5.7
+Checking: bolt ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: bolt=0.9.1-2~ubuntu20.04.1
+Checking: cloud-init ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: cloud-init=23.1.2-0ubuntu0~20.04.2
+Checking: cryptsetup ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: cryptsetup=2:2.2.2-3ubuntu2.4
+Checking: cryptsetup-bin ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: cryptsetup-bin=2:2.2.2-3ubuntu2.4
+Checking: cryptsetup-initramfs ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: cryptsetup-initramfs=2:2.2.2-3ubuntu2.4
+Checking: cryptsetup-run ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: cryptsetup-run=2:2.2.2-3ubuntu2.4
+Checking: distro-info ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: distro-info=0.23ubuntu1
+Checking: distro-info-data ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: distro-info-data=0.43ubuntu1.16
+Checking: e2fsprogs ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: e2fsprogs=1.45.5-2ubuntu1.1
+Checking: fwupd ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: fwupd=1.7.9-1~20.04.1
+Checking: fwupd-signed ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: fwupd-signed=1.51~20.04.1+1.2-3ubuntu0.2
+Checking: initramfs-tools ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: initramfs-tools=0.136ubuntu6.7
+Checking: initramfs-tools-bin ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: initramfs-tools-bin=0.136ubuntu6.7
+Checking: initramfs-tools-core ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: initramfs-tools-core=0.136ubuntu6.7
+Checking: iptables ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: iptables=1.8.4-3ubuntu2
+Checking: iputils-ping ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: iputils-ping=3:20190709-3
+Checking: iputils-tracepath ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: iputils-tracepath=3:20190709-3
+Checking: kpartx ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: kpartx=0.8.3-1ubuntu2.1
+Checking: landscape-common ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: landscape-common=19.12-0ubuntu4.3
+Checking: libapt-pkg6.0 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libapt-pkg6.0=2.0.9
+Checking: libcom-err2 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libcom-err2=1.45.5-2ubuntu1.1
+Checking: libcryptsetup12 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libcryptsetup12=2:2.2.2-3ubuntu2.4
+Checking: libext2fs2 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libext2fs2=1.45.5-2ubuntu1.1
+Checking: libfwupd2 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libfwupd2=1.7.9-1~20.04.1
+Checking: libfwupdplugin5 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libfwupdplugin5=1.7.9-1~20.04.1
+Checking: libgpgme11 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libgpgme11=1.13.1-7ubuntu2
+Checking: libip4tc2 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libip4tc2=1.8.4-3ubuntu2
+Checking: libip6tc2 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libip6tc2=1.8.4-3ubuntu2
+Checking: libnss-systemd ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libnss-systemd=245.4-4ubuntu3.20
+Checking: libpam-systemd ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libpam-systemd=245.4-4ubuntu3.20
+Checking: libpcap0.8 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libpcap0.8=1.9.1-3
+Checking: libss2 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libss2=1.45.5-2ubuntu1.1
+Checking: libsystemd0 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libsystemd0=245.4-4ubuntu3.20
+Checking: libudev1 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libudev1=245.4-4ubuntu3.20
+Checking: libunwind8 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libunwind8=1.2.1-9build1
+Checking: libxtables12 ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: libxtables12=1.8.4-3ubuntu2
+Checking: logsave ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: logsave=1.45.5-2ubuntu1.1
+Checking: ltrace ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: ltrace=0.7.3-6.1ubuntu1
+Checking: motd-news-config ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: motd-news-config=11ubuntu5.7
+Checking: multipath-tools ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: multipath-tools=0.8.3-1ubuntu2.1
+Checking: open-iscsi ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: open-iscsi=2.0.874-7.1ubuntu6.4
+Checking: pollinate ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: pollinate=4.33-3ubuntu1.20.04.1
+Checking: python3-debian ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: python3-debian=0.1.36ubuntu1
+Checking: python3-distro-info ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: python3-distro-info=0.23ubuntu1
+Checking: python3-software-properties ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: python3-software-properties=0.99.9.11
+Checking: python3-update-manager ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: python3-update-manager=1:20.04.10.11
+Checking: snapd ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: snapd=2.63+20.04ubuntu0.1
+Checking: software-properties-common ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: software-properties-common=0.99.9.11
+Checking: sosreport ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: sosreport=4.4-1ubuntu0.20.04.1
+Checking: systemd ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: systemd=245.4-4ubuntu3.20
+Checking: systemd-sysv ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: systemd-sysv=245.4-4ubuntu3.20
+Checking: systemd-timesyncd ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: systemd-timesyncd=245.4-4ubuntu3.20
+Checking: tcpdump ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: tcpdump=4.9.3-4ubuntu0.2
+Checking: ubuntu-advantage-tools ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: ubuntu-advantage-tools=27.13.6~20.04.1
+Checking: udev ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: udev=245.4-4ubuntu3.20
+Checking: ufw ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: ufw=0.36-6ubuntu1
+Checking: update-manager-core ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: update-manager-core=1:20.04.10.11
+Checking: update-notifier-common ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: update-notifier-common=3.192.30.16
+Checking: xfsprogs ([<Origin component:'main' archive:'focal-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
+adjusting candidate version: xfsprogs=5.3.0-1ubuntu2
+pkgs that look like they should be upgraded: 
+Fetched 0 B in 0s (0 B/s)                                                       
+fetch.run() result: 0
+Packages blacklist due to conffile prompts: []
+No packages found that can be upgraded unattended and no pending auto-removals
+Package apt has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package apt-utils has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package base-files has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package bolt has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package cloud-init has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package cryptsetup has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package cryptsetup-bin has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package cryptsetup-initramfs has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package cryptsetup-run has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package distro-info has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package distro-info-data has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package dmeventd has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package dmsetup has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package e2fsprogs has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package fwupd has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package fwupd-signed has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package initramfs-tools has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package initramfs-tools-bin has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package initramfs-tools-core has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package iptables has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package iputils-ping has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package iputils-tracepath has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package kpartx has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package landscape-common has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libapt-pkg6.0 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libcom-err2 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libcryptsetup12 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libdevmapper-event1.02.1 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libdevmapper1.02.1 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libext2fs2 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libfwupd2 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libfwupdplugin5 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libgpgme11 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libip4tc2 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libip6tc2 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package liblvm2cmd2.03 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libnss-systemd has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libpam-systemd has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libpcap0.8 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libss2 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libsystemd0 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libudev1 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libunwind8 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package libxtables12 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package logsave has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package ltrace has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package lvm2 has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package motd-news-config has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package multipath-tools has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package open-iscsi has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package pollinate has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package python3-debian has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package python3-distro-info has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package python3-software-properties has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package python3-update-manager has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package snapd has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package software-properties-common has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package sosreport has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package systemd has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package systemd-sysv has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package systemd-timesyncd has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package tcpdump has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package ubuntu-advantage-tools has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package udev has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package ufw has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package update-manager-core has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package update-notifier-common has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Package xfsprogs has a higher version available, checking if it is from an allowed origin and is not pinned down.
+Extracting content from /var/log/unattended-upgrades/unattended-upgrades-dpkg.log since 2025-07-03 03:27:02

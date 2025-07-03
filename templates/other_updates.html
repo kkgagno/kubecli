@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Other Updates for {{ hostname }}{% endblock %}
+
+{% block content %}
+    <h1>Other Updates for {{ hostname }}</h1>
+    {% if updates %}
+        <ul>
+        {% for update in updates %}
+            <li>{{ update.name }} (New: {{ update.new_version }}, Current: {{ update.current_version }})</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No other updates found.</p>
+    {% endif %}
+    <a href="{{ url_for('upgrade_status') }}" class="btn btn-primary">Back to Upgrade Status</a>
+{% endblock %}

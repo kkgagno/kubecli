@@ -1,7 +1,53 @@
 {% extends 'base.html' %}
 
-{% block title %}Kubernetes Dashboard{% endblock %}
+{% block title %}KubeDash - Dashboard{% endblock %}
 
 {% block content %}
-    <h1>Welcome to your Kubernetes Dashboard</h1>
+<div class="container-fluid">
+    <h1 class="text-center mb-4">DATA CENTER DASHBOARD</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-cubes"></i> Kubernetes Resources</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><a href="{{ url_for('get_pods') }}">Pods</a></li>
+                        <li class="list-group-item"><a href="{{ url_for('get_deployments') }}">Deployments</a></li>
+                        <li class="list-group-item"><a href="{{ url_for('get_services') }}">Services</a></li>
+                        <li class="list-group-item"><a href="{{ url_for('get_nodes') }}">Nodes</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-shield-alt"></i> Security & Compliance</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><a href="{{ url_for('compliance_reports') }}">OSCAP Reports</a></li>
+                        <li class="list-group-item"><a href="{{ url_for('upgrade_status') }}">Upgrade Status</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-cogs"></i> System</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><a href="{{ url_for('get_events') }}">Events</a></li>
+                        <li class="list-group-item"><a href="{{ url_for('change_password') }}">Change Password</a></li>
+                        <li class="list-group-item"><a href="{{ url_for('logout') }}">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

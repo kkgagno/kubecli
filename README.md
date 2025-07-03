@@ -46,6 +46,7 @@ The application now uses environment variables for sensitive paths and credentia
 *   `KUBECONFIG_PATH`: Path to your Kubernetes configuration file (default: `~/.kube/config`)
 *   `SSH_KEY_PATH`: Path to the SSH private key used for node operations (default: `~/.ssh/id_rsa`)
 *   `SSH_USERNAME`: Username for SSH connections to nodes (default: `keith`)
+*   `HELM_EXECUTABLE_PATH`: Path to the Helm executable (default: `/usr/local/bin/helm`)
 
 These variables can be set in your environment before running the application, for example:
 
@@ -54,6 +55,27 @@ export KUBECONFIG_PATH=/path/to/your/kube/config
 export SSH_KEY_PATH=/path/to/your/ssh/key
 export SSH_USERNAME=your_ssh_username
 ```
+
+## Prerequisites
+
+### Operating System
+
+This application is designed to be run on a Debian-based Linux distribution, with **Ubuntu** being the primary supported OS. Full functionality, especially for node management and package upgrade features, depends on tools and file structures specific to Ubuntu (e.g., `apt`, `unattended-upgrades`, `/var/run/reboot-required`).
+
+### System Dependencies
+
+Before running the application, you must install the following command-line tools on the system where the application is hosted:
+
+*   **Helm:** Required for managing Helm charts.
+*   **wkhtmltopdf:** Required for exporting compliance reports to PDF format. You can typically install it on Ubuntu with:
+    ```bash
+    sudo apt-get update
+    sudo apt-get install wkhtmltopdf
+    ```
+
+### Ansible
+
+The application uses `ansible-playbook` to run compliance scans and other tasks. The required Ansible packages are included in the `requirements.txt` file and will be installed automatically into the Python virtual environment during the setup process. No separate system-wide installation of Ansible is required.
 
 ## Setup and Running
 

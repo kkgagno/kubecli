@@ -20,27 +20,23 @@
         </div>
         <!-- Search Controls -->
         <div class="col-md-6">
-            <label for="searchInput" class="form-label">Filter the selected report:</label>
-            <div class="input-group">
-                <input type="text" id="searchInput" class="form-control" placeholder="Enter text to filter...">
-                <button class="btn btn-primary" type="button" id="searchButton">Filter</button>
-                <button class="btn btn-secondary" type="button" id="clearButton">Clear</button>
-                <div class="dropdown">
-                    <button class="btn btn-success dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        Download
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
-                        <li><a class="dropdown-item" href="#" id="downloadPdf">PDF</a></li>
-                        <li><a class="dropdown-item" href="#" id="downloadCsv">CSV</a></li>
-                    </ul>
-                </div>
+            <label class="form-label">Download Report:</label>
+            <div class="dropdown">
+                <button class="btn btn-success dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Download
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
+                    <li><a class="dropdown-item" href="#" id="downloadPdf">PDF (Selected Report)</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('download_summary_csv') }}" id="downloadCsv">CSV (All Reports)</a></li>
+                </ul>
             </div>
         </div>
     </div>
 
     <div class="row mb-3">
         <div class="col-md-12">
-            <button class="btn btn-info me-2" id="runGossPlaybookButton" data-bs-toggle="tooltip" title="This will kick off GOSS for compliance reporting across your kubernetes cluster nodes, run at times of low usage">Run GOSS Playbook</button>
+            <button class="btn btn-info me-2" id="runOscapScanButton" data-bs-toggle="tooltip" title="This will kick off OpenSCAP for compliance reporting across your kubernetes cluster nodes, run at times of low usage">Run OpenSCAP Scan</button>
+            <a href="{{ url_for('archived_reports') }}" class="btn btn-secondary">View Archived Reports</a>
         </div>
     </div>
 
@@ -48,216 +44,34 @@
     <pre id="playbookOutput" class="bg-light p-3 border rounded" style="max-height: 300px; overflow-y: scroll; display: none;"></pre>
 
     <!-- Iframe to display report -->
-    <iframe id="report-frame" src="{{ url_for('static', filename='goss_reports/' + default_report) }}" width="100%" height="800px" frameborder="0"></iframe>
+    {% if reports %}
+        <iframe id="report-frame" src="{{ url_for('static', filename='oscap_reports/' + default_report if default_report else '') }}" width="100%" height="800px" frameborder="0"></iframe>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No reports found. Click "Run OpenSCAP Scan" to generate reports.
+        </div>
+    {% endif %}
 
     <!-- Confirmation Modal -->
-    <div class="modal fade" id="gossConfirmationModal" tabindex="-1" aria-labelledby="gossConfirmationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="oscapConfirmationModal" tabindex="-1" aria-labelledby="oscapConfirmationModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="gossConfirmationModalLabel">Confirm Action</h5>
+            <h5 class="modal-title" id="oscapConfirmationModalLabel">Confirm Action</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            This will kick off GOSS for compliance reporting across your Kubernetes cluster nodes and may affect performance. Are you sure you want to continue?
+            This will kick off OpenSCAP for compliance reporting across your Kubernetes cluster nodes and may affect performance. This is a lengthy process, please be patient. Are you sure you want to continue?
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-danger" id="confirmRunGossButton">Yes, Run Playbook</button>
+            <button type="button" class="btn btn-danger" id="confirmRunOscapButton">Yes, Run Scan</button>
           </div>
         </div>
       </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const reportSelector = document.getElementById('reportSelector');
-            const reportFrame = document.getElementById('report-frame');
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
-            const clearButton = document.getElementById('clearButton');
-            let originalReportContent = '';
-
-            function setIframeContent(content) {
-                const iframeDoc = reportFrame.contentDocument || reportFrame.contentWindow.document;
-                iframeDoc.open();
-                iframeDoc.write(content);
-                iframeDoc.close();
-            }
-
-            reportFrame.addEventListener('load', function() {
-                const iframeDoc = reportFrame.contentDocument || reportFrame.contentWindow.document;
-                if (iframeDoc.body) {
-                    originalReportContent = iframeDoc.documentElement.innerHTML;
-                }
-            });
-
-            reportSelector.addEventListener('change', function() {
-                const selectedReport = this.value;
-                if (selectedReport) {
-                    reportFrame.src = `{{ url_for('static', filename='goss_reports/') }}${selectedReport}`;
-                } else {
-                    reportFrame.src = 'about:blank';
-                }
-            });
-
-            searchButton.addEventListener('click', function() {
-                const searchTerm = searchInput.value.toLowerCase();
-                if (!searchTerm) {
-                    return;
-                }
-                if (!originalReportContent) {
-                    alert('Please wait for the report to finish loading before filtering.');
-                    return;
-                }
-
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(originalReportContent, 'text/html');
-                const newBody = doc.createElement('body');
-
-                doc.querySelectorAll('table').forEach(table => {
-                    const newTable = table.cloneNode(false);
-                    const newTbody = document.createElement('tbody');
-                    let hasMatch = false;
-
-                    table.querySelectorAll('tbody tr').forEach(row => {
-                        if (row.textContent.toLowerCase().includes(searchTerm)) {
-                            newTbody.appendChild(row.cloneNode(true));
-                            hasMatch = true;
-                        }
-                    });
-
-                    if (hasMatch) {
-                        const thead = table.querySelector('thead');
-                        if (thead) {
-                            newTable.appendChild(thead.cloneNode(true));
-                        }
-                        newTable.appendChild(newTbody);
-                        newBody.appendChild(newTable);
-                    }
-                });
-
-                if (newBody.children.length > 0) {
-                    setIframeContent(`<html><head>${doc.head.innerHTML}</head><body>${newBody.innerHTML}</body></html>`);
-                } else {
-                    setIframeContent('<body><p>No results found.</p></body>');
-                }
-            });
-
-            clearButton.addEventListener('click', function() {
-                searchInput.value = '';
-                if (originalReportContent) {
-                    setIframeContent(originalReportContent);
-                }
-            });
-
-            const downloadPdf = document.getElementById('downloadPdf');
-            const downloadCsv = document.getElementById('downloadCsv');
-
-            downloadPdf.addEventListener('click', function(e) {
-                e.preventDefault();
-                const selectedReport = reportSelector.value;
-                if (selectedReport) {
-                    window.location.href = `/download_report/${selectedReport}/pdf`;
-                }
-            });
-
-            downloadCsv.addEventListener('click', function(e) {
-                e.preventDefault();
-                const selectedReport = reportSelector.value;
-                if (selectedReport) {
-                    window.location.href = `/download_report/${selectedReport}/csv`;
-                }
-            });
-
-            const runGossPlaybookButton = document.getElementById('runGossPlaybookButton');
-            const playbookStatus = document.getElementById('playbookStatus');
-            const playbookOutput = document.getElementById('playbookOutput');
-            const gossConfirmationModal = new bootstrap.Modal(document.getElementById('gossConfirmationModal'));
-            const confirmRunGossButton = document.getElementById('confirmRunGossButton');
-
-            runGossPlaybookButton.addEventListener('click', () => {
-                gossConfirmationModal.show();
-            });
-
-            confirmRunGossButton.addEventListener('click', () => {
-                gossConfirmationModal.hide();
-                runPlaybook('/run_goss_playbook', runGossPlaybookButton);
-            });
-
-            async function runPlaybook(url, button) {
-                button.disabled = true;
-                playbookStatus.classList.remove('d-none', 'alert-success', 'alert-danger', 'alert-warning');
-                playbookStatus.classList.add('alert-info');
-                playbookStatus.textContent = 'Starting playbook...';
-                playbookOutput.style.display = 'none';
-                playbookOutput.textContent = '';
-
-                try {
-                    const response = await fetch(url, { method: 'POST' });
-                    const data = await response.json();
-
-                    if (response.status === 202) {
-                        playbookStatus.textContent = data.message + ' This may take a while...';
-                        playbookOutput.style.display = 'block';
-                        pollTaskStatus(data.task_id, button);
-                    } else {
-                        playbookStatus.classList.remove('alert-info');
-                        playbookStatus.classList.add('alert-danger');
-                        playbookStatus.textContent = `Error: ${data.message || 'Unknown error'}`;
-                        button.disabled = false;
-                    }
-                } catch (error) {
-                    playbookStatus.classList.remove('alert-info');
-                    playbookStatus.classList.add('alert-danger');
-                    playbookStatus.textContent = `Network error: ${error.message}`;
-                    button.disabled = false;
-                }
-            }
-
-            async function pollTaskStatus(taskId, button) {
-                const interval = setInterval(async () => {
-                    try {
-                        const response = await fetch(`/get_task_status/${taskId}`);
-                        const data = await response.json();
-
-                        if (data.status === 'running') {
-                            playbookStatus.textContent = 'Playbook is running... (This may take a while)';
-                            playbookOutput.textContent = data.output;
-                        } else if (data.status === 'completed') {
-                            clearInterval(interval);
-                            playbookStatus.classList.remove('alert-info');
-                            playbookStatus.classList.add('alert-success');
-                            playbookStatus.textContent = 'Playbook completed successfully!';
-                            playbookOutput.style.display = 'none';
-                            window.open(`/playbook_output/${taskId}`, '_blank', 'height=600,width=800');
-                            button.disabled = false;
-                            window.location.reload();
-                        } else if (data.status === 'failed' || data.status === 'error') {
-                            clearInterval(interval);
-                            playbookStatus.classList.remove('alert-info');
-                            playbookStatus.classList.add('alert-danger');
-                            playbookStatus.textContent = `Playbook ${data.status}! Output opened in new window.`;
-                            playbookOutput.style.display = 'none';
-                            window.open(`/playbook_output/${taskId}`, '_blank', 'height=600,width=800');
-                            button.disabled = false;
-                        } else if (data.status === 'not_found') {
-                            clearInterval(interval);
-                            playbookStatus.classList.remove('alert-info');
-                            playbookStatus.classList.add('alert-danger');
-                            playbookStatus.textContent = 'Task not found.';
-                            button.disabled = false;
-                        }
-                        playbookOutput.scrollTop = playbookOutput.scrollHeight;
-                    } catch (error) {
-                        clearInterval(interval);
-                        playbookStatus.classList.remove('alert-info');
-                        playbookStatus.classList.add('alert-danger');
-                        playbookStatus.textContent = `Error polling status: ${error.message}`;
-                        button.disabled = false;
-                    }
-                }, 5000);
-            }
-        });
-    </script>
+    {% block scripts %}
+    <script src="{{ url_for('static', filename='js/compliance.js') }}"></script>
+{% endblock %}
 {% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Upgrade Status{% endblock %}
+
+{% block content %}
+    <h1>Upgrade Status</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="hosts-table-body">
+            {% for host in hosts_list %}
+            {% if host != 'nginx' and 'endpoint' not in host %}
+            <tr id="host-row-{{ host }}">
+                <td>{{ host }}</td>
+                <td id="status-{{ host }}">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Checking...
+                </td>
+                <td class="text-center" style="white-space: nowrap;">
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-url="{{ url_for('get_updates', hostname=host, update_type='security') }}" data-title="Security Updates for {{ host }}" disabled>
+                        Security Updates
+                    </button>
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-url="{{ url_for('get_updates', hostname=host, update_type='other') }}" data-title="Other Updates for {{ host }}" disabled>
+                        Other Updates
+                    </button>
+                    <form action="{{ url_for('run_patch', hostname=host, patch_type='security') }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to patch security updates for {{ host }}?');">
+                        <button type="submit" class="btn btn-danger btn-sm" disabled>Patch Security</button>
+                    </form>
+                    <form action="{{ url_for('run_patch', hostname=host, patch_type='non-security') }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to patch non-security updates for {{ host }}?');">
+                        <button type="submit" class="btn btn-warning btn-sm" disabled>Patch Non-Security</button>
+                    </form>
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const hosts = {{ hosts_list | tojson }};
+
+    hosts.forEach(host => {
+        if (host === 'nginx' || host.includes('endpoint')) {
+            return;
+        }
+        
+        const statusCell = document.getElementById(`status-${host}`);
+        const row = document.getElementById(`host-row-${host}`);
+        const buttons = row.querySelectorAll('button');
+
+        if (!statusCell) return;
+
+        fetch(`/get_host_status/${host}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'Patches needed') {
+                    statusCell.innerHTML = `<span class="badge bg-danger">${data.status}</span>`;
+                } else if (data.status === 'No patches needed') {
+                    statusCell.innerHTML = `<span class="badge bg-success">${data.status}</span>`;
+                } else {
+                    statusCell.innerHTML = `<span class="badge bg-warning">${data.status}</span>`;
+                }
+                buttons.forEach(button => button.disabled = false);
+            })
+            .catch(error => {
+                console.error(`Error fetching status for ${host}:`, error);
+                statusCell.innerHTML = `<span class="badge bg-secondary">Error</span>`;
+            });
+    });
+
+    var describeModal = document.getElementById('describeModal');
+    if (describeModal) {
+        describeModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var url = button.getAttribute('data-url');
+            var title = button.getAttribute('data-title');
+
+            var modalTitle = describeModal.querySelector('.modal-title');
+            var modalBody = describeModal.querySelector('#modal-content-body');
+
+            modalTitle.textContent = title;
+            modalBody.innerHTML = '<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+            if (url) {
+                fetch(url)
+                    .then(response => {
+                        if (response.status === 401) {
+                            window.location.href = "{{ url_for('login') }}";
+                            return;
+                        }
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if(data && Array.isArray(data) && data.length > 0) {
+                            let content = '<ul>';
+                            data.forEach(item => {
+                                if(typeof item === 'object' && item !== null && 'name' in item) {
+                                    content += `<li>${item.name} (New: ${item.new_version}, Current: ${item.current_version})</li>`;
+                                } else {
+                                    content += `<li>${item}</li>`;
+                                }
+                            });
+                            content += '</ul>';
+                            modalBody.innerHTML = content;
+                        } else {
+                            modalBody.textContent = 'No updates found.';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching description:', error);
+                        modalBody.textContent = 'Error loading content.';
+                    });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

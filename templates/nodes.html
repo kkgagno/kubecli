@@ -2,26 +2,12 @@
 
 {% block title %}Kubernetes Nodes{% endblock %}
 
-{% block head %}
-    <style>
-        .btn:disabled {
-            background-color: #d3d3d3;
-            cursor: not-allowed;
-        }
-    </style>
-    <script>
-        function openDescribe(resourceType, namespace, name) {
-            window.open(`/describe/${resourceType}/${namespace}/${name}`, '_blank', 'height=600,width=800');
-        }
-    </script>
-{% endblock %}
-
 {% block content %}
     <h1>Kubernetes Nodes</h1>
-    <form class="row g-3 align-items-center mb-3" method="GET" action="/nodes">
+    <form class="row g-3 align-items-center mb-3" method="GET" action="{{ url_for('get_nodes') }}">
         <div class="col-auto">
             <label for="search" class="visually-hidden">Search</label>
-            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query if search_query else '' }}">
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query or '' }}">
         </div>
         <div class="col-auto">
             <button type="submit" class="btn btn-primary">Search</button>
@@ -42,9 +28,7 @@
             {% for node in nodes %}
             <tr>
                 <td>{{ node.metadata.name }}</td>
-                <td>
-                    {{ node.status_display }}
-                </td>
+                <td>{{ node.status_display }}</td>
                 <td>
                     {% for label, value in node.metadata.labels.items() %}
                         {% if 'node-role.kubernetes.io/' in label %}
@@ -53,9 +37,11 @@
                     {% endfor %}
                 </td>
                 <td>{{ node.status.node_info.os_image }}</td>
-                <td>{{ "%.2f"|format(node.minutes_since_reboot) }}</td>
+                <td>{{ "%.2f"|format(node.minutes_since_reboot) if node.minutes_since_reboot is defined else 'N/A' }}</td>
                 <td style="white-space: nowrap;">
-                    <button class="btn btn-info btn-sm" onclick="openDescribe('node', '-', '{{ node.metadata.name }}')">Describe</button>
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-url="{{ url_for('describe_resource', resource_type='node', namespace='-', name=node.metadata.name) }}" data-title="Describe Node: {{ node.metadata.name }}">
+                        Describe
+                    </button>
                     <form action="{{ url_for('cordon_node', node_name=node.metadata.name) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to cordon this node?');">
                         <button type="submit" class="btn btn-warning btn-sm" {% if node.spec.unschedulable %}disabled{% endif %}>Cordon & Drain</button>
                     </form>
@@ -71,4 +57,48 @@
             {% endfor %}
         </tbody>
     </table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var describeModal = document.getElementById('describeModal');
+    if (describeModal) {
+        describeModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var url = button.getAttribute('data-url');
+            var title = button.getAttribute('data-title');
+
+            var modalTitle = describeModal.querySelector('.modal-title');
+            var modalBody = describeModal.querySelector('#modal-content-body');
+
+            modalTitle.textContent = title;
+            modalBody.innerHTML = '<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+            if (url) {
+                fetch(url)
+                    .then(response => {
+                        if (response.status === 401) {
+                            window.location.href = "{{ url_for('login') }}";
+                            return;
+                        }
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        if(data) {
+                            modalBody.textContent = data;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching description:', error);
+                        modalBody.textContent = 'Error loading content.';
+                    });
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

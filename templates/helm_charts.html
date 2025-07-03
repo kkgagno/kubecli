@@ -2,20 +2,12 @@
 
 {% block title %}Kubernetes Helm Charts{% endblock %}
 
-{% block head %}
-    <script>
-        function openHelmChartResources(namespace, name) {
-            window.open(`/helm_chart_resources/${namespace}/${name}`, '_blank', 'height=600,width=800');
-        }
-    </script>
-{% endblock %}
-
 {% block content %}
     <h1>Kubernetes Helm Charts</h1>
-    <form class="row g-3 align-items-center mb-3" method="GET" action="/helm_charts">
+    <form class="row g-3 align-items-center mb-3" method="GET" action="{{ url_for('get_helm_charts') }}">
         <div class="col-auto">
             <label for="search" class="visually-hidden">Search</label>
-            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query if search_query else '' }}">
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search by name" value="{{ search_query or '' }}">
         </div>
         <div class="col-auto">
             <button type="submit" class="btn btn-primary">Search</button>
@@ -40,7 +32,9 @@
                 <td>{{ chart.chart }}</td>
                 <td>{{ chart.status }}</td>
                 <td>
-                    <button class="btn btn-info btn-sm" onclick="openHelmChartResources('{{ chart.namespace }}', '{{ chart.name }}')">View Resources</button>
+                    <button type="button" class="btn btn-info btn-sm view-resources-btn" data-bs-toggle="modal" data-bs-target="#helmResourcesModal" data-url="{{ url_for('get_helm_chart_resources', namespace=chart.namespace, name=chart.name) }}" data-title="Resources for {{ chart.name }}">
+                        View Resources
+                    </button>
                 </td>
                 <td style="white-space: nowrap;">
                     <form action="{{ url_for('delete_helm_chart', namespace=chart.namespace, name=chart.name) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this helm chart?');">
@@ -51,4 +45,74 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Helm Resources Modal -->
+    <div class="modal fade" id="helmResourcesModal" tabindex="-1" aria-labelledby="helmResourcesModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="helmResourcesModalLabel">Helm Chart Resources</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="helm-resources-modal-body">
+            Loading...
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const helmResourcesModal = document.getElementById('helmResourcesModal');
+    const modalTitle = helmResourcesModal.querySelector('.modal-title');
+    const modalBody = helmResourcesModal.querySelector('#helm-resources-modal-body');
+    let initialTitle = '';
+    let initialUrl = '';
+
+    helmResourcesModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        initialUrl = button.getAttribute('data-url');
+        initialTitle = button.getAttribute('data-title');
+        
+        modalTitle.textContent = initialTitle;
+        modalBody.innerHTML = '<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+        fetch(initialUrl)
+            .then(response => response.text())
+            .then(html => {
+                modalBody.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error fetching Helm resources:', error);
+                modalBody.textContent = 'Error loading content.';
+            });
+    });
+
+    modalBody.addEventListener('click', function(event) {
+        if (event.target.classList.contains('describe-resource-btn')) {
+            const button = event.target;
+            const url = button.getAttribute('data-url');
+            const title = button.getAttribute('data-title');
+
+            modalTitle.textContent = title;
+            modalBody.innerHTML = '<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    modalBody.innerHTML = `<pre>${data}</pre>`;
+                })
+                .catch(error => {
+                    console.error('Error fetching resource description:', error);
+                    modalBody.textContent = 'Error loading content.';
+                });
+        }
+    });
+});
+</script>
 {% endblock %}

@@ -1,0 +1,44 @@
+---
+- name: Run OpenSCAP Scan
+  hosts: all:!nginx:!node1
+  become: yes
+  tasks:
+    - name: Run OpenSCAP scan
+      command: oscap xccdf eval --profile cis_level1_server --results /tmp/scan-results-{{ inventory_hostname }}.xml /usr/share/scap-security-guide/ssg-ubuntu2404-ds.xml
+      ignore_errors: yes
+
+    - name: Fetch reports
+      fetch:
+        src: /tmp/scan-results-{{ inventory_hostname }}.xml
+        dest: "{{ playbook_dir }}/../static/oscap_reports/xml/"
+        flat: yes
+
+- name: Generate Reports
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Find all XML reports
+      find:
+        paths: "{{ playbook_dir }}/../static/oscap_reports/xml"
+        patterns: "*.xml"
+      register: xml_reports
+
+    - name: Generate individual HTML reports
+      command: oscap xccdf generate report {{ item.path }}
+      with_items: "{{ xml_reports.files }}"
+      register: report_generation
+      changed_when: false
+
+    - name: Move individual reports
+      command: mv report.html {{ playbook_dir }}/../static/oscap_reports/{{ item.item.path | basename | regex_replace('.xml$', '.html') }}
+      with_items: "{{ report_generation.results }}"
+      changed_when: false
+
+    - name: Generate aggregated report
+      command: oscap xccdf generate report {{ playbook_dir }}/../static/oscap_reports/xml/*.xml
+      register: aggregated_report_generation
+      changed_when: false
+
+    - name: Move aggregated report
+      command: mv report.html {{ playbook_dir }}/../static/oscap_reports/aggregated_oscap_report.html
+      changed_when: false

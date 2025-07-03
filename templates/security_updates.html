@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Security Updates for {{ hostname }}{% endblock %}
+
+{% block content %}
+    <h1>Security Updates for {{ hostname }}</h1>
+    {% if updates %}
+        <ul>
+        {% for update in updates %}
+            <li>{{ update }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No security updates found.</p>
+    {% endif %}
+    <a href="{{ url_for('upgrade_status') }}" class="btn btn-primary">Back to Upgrade Status</a>
+{% endblock %}
