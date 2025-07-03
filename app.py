@@ -20,7 +20,7 @@ from kubernetes import client, config
 import paramiko
 
 app = Flask(__name__)
-app.secret_key = 'a_secure_random_string' # Required for flash messages
+app.secret_key = '3727fc9d59984122d856c7faa4b9078cf2ec7a74b857f62c' # Required for flash messages
 
 @app.context_processor
 def inject_now():
@@ -153,6 +153,7 @@ def run_ansible_playbook_async(task_id, task_type, playbook_path, inventory_path
 import socket
 
 @app.route('/run_oscap_scan', methods=['POST'])
+@login_required
 def run_oscap_scan():
     for task_id, task_info in running_tasks.items():
         if task_info.get('type') == 'oscap' and task_info.get('status') == 'running':
@@ -205,6 +206,7 @@ def run_oscap_scan():
 
 
 @app.route('/run_report_playbook', methods=['POST'])
+@login_required
 def run_report_playbook():
     for task_id, task_info in running_tasks.items():
         if task_info.get('type') == 'report' and task_info.get('status') == 'running':
@@ -249,6 +251,7 @@ def run_report_playbook():
 
 
 @app.route('/get_task_status/<task_id>')
+@login_required
 def get_task_status(task_id):
     task = running_tasks.get(task_id)
     if task:
@@ -256,10 +259,12 @@ def get_task_status(task_id):
     return jsonify({'status': 'not_found', 'message': 'Task not found.'}), 404
 
 @app.route('/get_all_task_statuses')
+@login_required
 def get_all_task_statuses():
     return jsonify(running_tasks)
 
 @app.route('/playbook_output/<task_id>')
+@login_required
 def playbook_output(task_id):
     task = running_tasks.get(task_id)
     if task:
@@ -415,6 +420,7 @@ def delete_pod(namespace, pod_name):
     return redirect(url_for('get_pods'))
 
 @app.route('/describe/<resource_type>/<namespace>/<name>')
+@login_required
 def describe_resource(resource_type, namespace, name):
     if 'logged_in' not in session:
         return "Unauthorized", 401

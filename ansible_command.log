@@ -1,13 +1,13 @@
-Executing Ansible command: /home/keith/simple_kube_web_app/./venv/bin/ansible-playbook -i /home/keith/simple_kube_web_app/./inventory.ini --user keith --private-key /home/keith/.ssh/id_rsa --extra-vars ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --extra-vars ansible_python_interpreter=/usr/bin/python3 /home/keith/simple_kube_web_app/./ansible_oscap_scan/oscap_scan.yml
+Executing Ansible command: /home/keith/simple_kube_web_app/venv/bin/ansible-playbook -i /home/keith/simple_kube_web_app/inventory.ini --user keith --private-key /home/keith/.ssh/id_rsa --extra-vars ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --extra-vars ansible_python_interpreter=/usr/bin/python3 /home/keith/simple_kube_web_app/ansible_oscap_scan/oscap_scan.yml
 
 
 PLAY [Install OpenSCAP, Run Scan, and Fetch XML] *******************************
 
 TASK [Gathering Facts] *********************************************************
-ok: [mstr224]
 ok: [mstr120]
 ok: [mstr124]
 ok: [mstr324]
+ok: [mstr224]
 ok: [wrkr124]
 ok: [wrkr224]
 ok: [wrkr324]
@@ -31,59 +31,4 @@ skipping: [wrkr224]
 skipping: [wrkr324]
 
 TASK [Install OpenSCAP Scanner and Unzip] **************************************
-ok: [wrkr124]
 ok: [mstr324]
-ok: [mstr124]
-ok: [mstr120]
-ok: [mstr224]
-ok: [wrkr324]
-ok: [wrkr224]
-
-TASK [Download and Unarchive SCAP Security Guide] ******************************
-skipping: [mstr120]
-skipping: [mstr124]
-skipping: [mstr224]
-skipping: [mstr324]
-skipping: [wrkr124]
-skipping: [wrkr224]
-skipping: [wrkr324]
-
-TASK [Run OpenSCAP scan to generate XML results] *******************************
-changed: [mstr120]
-changed: [mstr324]
-changed: [mstr124]
-changed: [wrkr124]
-changed: [mstr224]
-changed: [wrkr224]
-changed: [wrkr324]
-
-TASK [Fetch the XML report] ****************************************************
-changed: [mstr224]
-changed: [mstr124]
-changed: [wrkr124]
-changed: [mstr324]
-changed: [mstr120]
-changed: [wrkr224]
-changed: [wrkr324]
-
-PLAY [Generate HTML Reports on Localhost] **************************************
-
-TASK [Gathering Facts] *********************************************************
-ok: [localhost]
-
-TASK [Find all XML reports fetched from hosts] *********************************
-ok: [localhost]
-
-TASK [Generate individual HTML reports from XML] *******************************
-ok: [localhost]
-
-PLAY RECAP *********************************************************************
-localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-mstr120                    : ok=5    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
-mstr124                    : ok=5    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
-mstr224                    : ok=5    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
-mstr324                    : ok=5    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
-wrkr124                    : ok=5    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
-wrkr224                    : ok=5    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
-wrkr324                    : ok=5    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
-
