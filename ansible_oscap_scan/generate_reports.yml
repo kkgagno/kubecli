@@ -1,0 +1,70 @@
+---
+- name: Generate and Archive HTML Reports on Localhost
+  hosts: localhost
+  connection: local
+  vars:
+    timestamp: "{{ now(utc=True, fmt='%Y-%m-%dT%H-%M-%S') }}"
+    reports_dir: "{{ playbook_dir }}/../static/oscap_reports"
+    archive_dir: "{{ playbook_dir }}/../static/oscap_reports_archive"
+  tasks:
+    - name: Create archive directory if it doesn't exist
+      file:
+        path: "{{ archive_dir }}"
+        state: directory
+
+    - name: Find old HTML reports to archive
+      find:
+        paths: "{{ reports_dir }}"
+        patterns: "*.html"
+      register: old_html_reports
+
+    - name: Archive old HTML reports
+      command: "mv {{ item.path }} {{ archive_dir }}/"
+      with_items: "{{ old_html_reports.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+    - name: Find old CSV reports to archive
+      find:
+        paths: "{{ reports_dir }}"
+        patterns: "*.csv"
+      register: old_csv_reports
+
+    - name: Archive old CSV reports
+      command: "mv {{ item.path }} {{ archive_dir }}/"
+      with_items: "{{ old_csv_reports.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+    - name: Find all XML reports fetched from hosts
+      find:
+        paths: "{{ playbook_dir }}/../tmp_reports"
+        patterns: "*.xml"
+      register: xml_reports
+
+    - name: Generate individual HTML reports from XML
+      shell: |
+        set -e
+        for xml_file in {{ xml_reports.files | map(attribute='path') | join(' ') }}; do
+          html_file="{{ reports_dir }}/$(basename "$xml_file" .xml)-{{ timestamp }}.html"
+          oscap xccdf generate report --output "$html_file" "$xml_file"
+        done
+      changed_when: false
+      args:
+        executable: /bin/bash
+
+    - name: Enforce 30-day retention policy on archived reports
+      find:
+        paths: "{{ archive_dir }}"
+        patterns: "*.html,*.csv"
+        age: "30d"
+        age_stamp: "mtime"
+      register: reports_to_delete
+
+    - name: Delete reports older than 30 days
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ reports_to_delete.files }}"
+      loop_control:
+        label: "{{ item.path }}"

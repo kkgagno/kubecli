@@ -1,0 +1,32 @@
+Get:1 file:/usr/local/share/dummy-repo ./ InRelease
+Ign:1 file:/usr/local/share/dummy-repo ./ InRelease
+Get:2 file:/usr/local/share/dummy-repo ./ Release [844 B]
+Get:2 file:/usr/local/share/dummy-repo ./ Release [844 B]
+Get:3 file:/usr/local/share/dummy-repo ./ Release.gpg
+Ign:3 file:/usr/local/share/dummy-repo ./ Release.gpg
+Hit:4 http://us.archive.ubuntu.com/ubuntu noble InRelease
+Get:6 http://us.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:7 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Hit:5 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.30/deb  InRelease
+Get:8 http://us.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:9 http://us.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [162 kB]
+Get:10 http://us.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+Get:11 http://us.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [376 kB]
+Get:12 http://us.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:13 http://us.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7,064 B]
+Get:14 http://us.archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [212 B]
+Get:15 http://us.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [16.4 kB]
+Get:16 http://us.archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+Get:17 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.6 kB]
+Get:18 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+Get:19 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.2 kB]
+Get:20 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [208 B]
+Fetched 1,016 kB in 1s (985 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+Calculating upgrade...
+The following upgrades have been deferred due to phasing:
+  ubuntu-drivers-common
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.

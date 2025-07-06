@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const playbookOutput = document.getElementById('playbookOutput');
     const oscapConfirmationModalElement = document.getElementById('oscapConfirmationModal');
     let oscapConfirmationModal;
+    let pollInterval = null; // Variable to hold the polling interval
 
     if (oscapConfirmationModalElement) {
         oscapConfirmationModal = new bootstrap.Modal(oscapConfirmationModalElement);
@@ -34,43 +35,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    async function runPlaybook(url) {
-        handlePlaybookStart();
-
-        try {
-            const response = await fetch(url, { method: 'POST' });
-            const data = await response.json();
-
-            if (response.status === 202) {
-                updatePlaybookStatus(data.message + ' This may take a while...', 'info');
-                if (playbookOutput) {
-                    playbookOutput.style.display = 'block';
-                }
-                pollTaskStatus(data.task_id);
-            } else {
-                updatePlaybookStatus(`Error: ${data.message || 'Unknown error'}`, 'danger');
-                setButtonState(runOscapScanButton, false);
-            }
-        } catch (error) {
-            updatePlaybookStatus(`Network error: ${error.message}`, 'danger');
-            setButtonState(runOscapScanButton, false);
-        }
-    }
-
     async function pollTaskStatus(taskId) {
-        const interval = setInterval(async () => {
+        if (pollInterval) {
+            clearInterval(pollInterval); // Clear any existing interval
+        }
+
+        pollInterval = setInterval(async () => {
             try {
                 const response = await fetch(`/get_task_status/${taskId}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
 
                 if (data.status === 'running') {
-                    updatePlaybookStatus('Playbook is running... (This may take a while)', 'info');
+                    let message = 'Playbook is running';
+                    if (data.hosts && data.hosts.length > 0) {
+                        message += ` on hosts: ${data.hosts.join(', ')}`;
+                    }
+                    message += ' (This may take a while)';
+                    updatePlaybookStatus(message, 'info');
                     if (playbookOutput) playbookOutput.textContent = data.output;
                 } else {
-                    clearInterval(interval);
+                    clearInterval(pollInterval);
+                    pollInterval = null;
                     setButtonState(runOscapScanButton, false);
-                    if (data.status === 'completed') {
+                    if (data.status === 'completed' || data.status === 'completed_and_reloaded') {
                         updatePlaybookStatus('Playbook completed successfully! Page will reload.', 'success');
                         setTimeout(() => window.location.reload(), 2000);
                     } else if (data.status === 'failed' || data.status === 'error') {
@@ -87,7 +75,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     playbookOutput.scrollTop = playbookOutput.scrollHeight;
                 }
             } catch (error) {
-                clearInterval(interval);
+                clearInterval(pollInterval);
+                pollInterval = null;
                 updatePlaybookStatus(`Error polling status: ${error.message}`, 'danger');
                 setButtonState(runOscapScanButton, false);
             }
@@ -102,7 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
             for (const taskId in tasks) {
                 if (tasks[taskId].type === 'oscap' && tasks[taskId].status === 'running') {
                     setButtonState(runOscapScanButton, true);
-                    updatePlaybookStatus('OpenSCAP scan is already in progress...', 'info');
+                    const hosts = tasks[taskId].hosts ? `: ${tasks[taskId].hosts.join(', ')}` : '';
+                    updatePlaybookStatus(`OpenSCAP scan is already in progress on hosts${hosts}...`, 'info');
                     if (playbookOutput) playbookOutput.style.display = 'block';
                     pollTaskStatus(taskId);
                     break;
@@ -118,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (reportSelector) {
         reportSelector.addEventListener('change', function() {
             if (reportFrame) {
-                reportFrame.src = this.value ? `/static/oscap_reports/${this.value}` : 'about:blank';
+                reportFrame.src = this.value ? `/view_oscap_report/${this.value}` : 'about:blank';
             }
         });
     }
@@ -133,6 +123,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    const cancelButtons = document.querySelectorAll('.cancel-scan');
+    if (cancelButtons) {
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (oscapConfirmationModal) {
+                    oscapConfirmationModal.hide();
+                }
+            });
+        });
+    }
+
     if (runOscapScanButton) {
         runOscapScanButton.addEventListener('click', () => {
             if (oscapConfirmationModal) oscapConfirmationModal.show();
@@ -143,10 +144,54 @@ document.addEventListener('DOMContentLoaded', function() {
     if (confirmRunOscapButton) {
         confirmRunOscapButton.addEventListener('click', () => {
             if (oscapConfirmationModal) oscapConfirmationModal.hide();
-            fetch('/run_oscap_scan', { method: 'POST' })
-                .then(() => {
+            const hostSelector = document.getElementById('hostSelector');
+            const selectedHosts = [...hostSelector.options].filter(option => option.selected).map(option => option.value);
+
+            if (selectedHosts.length === 0) {
+                alert('Please select at least one host to scan.');
+                return;
+            }
+
+            const formData = new FormData();
+            selectedHosts.forEach(host => {
+                formData.append('selected_hosts', host);
+            });
+
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+
+            fetch('/run_oscap_scan', {
+                method: 'POST',
+                body: formData,
+                redirect: 'follow'
+            })
+            .then(response => {
+                if (response.redirected) {
                     window.location.reload();
-                });
+                } else if (response.ok || response.status === 409) {
+                    return response.json().then(data => {
+                        if (data.task_id) {
+                            handlePlaybookStart();
+                            updatePlaybookStatus(data.message, 'info');
+                            if (playbookOutput) {
+                                playbookOutput.style.display = 'block';
+                            }
+                            pollTaskStatus(data.task_id);
+                        } else if (data.message) {
+                            updatePlaybookStatus(data.message, 'warning');
+                            setButtonState(runOscapScanButton, false);
+                        }
+                    });
+                } else {
+                    throw new Error('An unexpected server error occurred.');
+                }
+            })
+            .catch(error => {
+                updatePlaybookStatus(error.message, 'danger');
+                setButtonState(runOscapScanButton, false);
+            });
         });
     }
 

@@ -1,6 +1,28 @@
 ---
+- name: Clean old XML reports from local tmp_reports directory
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Ensure tmp_reports directory exists
+      file:
+        path: "{{ playbook_dir }}/../tmp_reports/"
+        state: directory
+
+    - name: Find old XML files
+      find:
+        paths: "{{ playbook_dir }}/../tmp_reports/"
+        patterns: "*.xml"
+      register: old_reports
+
+    - name: Delete old XML files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ old_reports.files }}"
+      when: old_reports.matched > 0
+
 - name: Install OpenSCAP, Run Scan, and Fetch XML
-  hosts: all:!nginx:!node1
+  hosts: "{{ hosts_to_scan | default('all:!nginx') }}"
   become: yes
   tasks:
     - name: Set OS-specific variables
@@ -41,32 +63,17 @@
       register: oscap_scan
       failed_when: "oscap_scan.rc not in [0, 2]"
 
+
+    - name: Recreate the tmp_reports directory
+      file:
+        path: "{{ playbook_dir }}/../tmp_reports/"
+        state: directory
+
     - name: Fetch the XML report
       fetch:
         src: /tmp/scan-results-{{ inventory_hostname }}.xml
         dest: "{{ playbook_dir }}/../tmp_reports/"
         flat: yes
 
-- name: Generate HTML Reports on Localhost
-  hosts: localhost
-  connection: local
-  vars:
-    timestamp: "{{ now(utc=True, fmt='%Y-%m-%dT%H-%M-%S') }}"
-  tasks:
-    - name: Find all XML reports fetched from hosts
-      find:
-        paths: "{{ playbook_dir }}/../tmp_reports"
-        patterns: "*.xml"
-      register: xml_reports
 
-    - name: Generate individual HTML reports from XML
-      shell: |
-        set -e
-        for xml_file in {{ xml_reports.files | map(attribute='path') | join(' ') }}; do
-          html_file="{{ playbook_dir }}/../static/oscap_reports/$(basename "$xml_file" .xml)-{{ timestamp }}.html"
-          oscap xccdf generate report --output "$html_file" "$xml_file"
-        done
-      changed_when: false
-      args:
-        executable: /bin/bash
 

@@ -10,8 +10,9 @@
 </head>
 <body>
     <div class="sidebar">
-        <a class="sidebar-brand" href="{{ url_for('index') }}">Jarvice Kube GUI</a>
+        <a class="sidebar-brand" href="{{ url_for('index') }}">Jarvice DataCenter GUI</a>
         <ul class="nav flex-column">
+            <li class="nav-item nav-category fw-bold text-uppercase">Kubernetes</li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('get_pods') }}">Pods</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('get_deployments') }}">Deployments</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('get_services') }}">Services</a></li>
@@ -24,25 +25,25 @@
             <li class="nav-item"><a class="nav-link" href="{{ url_for('get_secrets') }}">Secrets</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('get_events') }}">Events</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('get_helm_charts') }}">Helm Charts</a></li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Compliance
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="{{ url_for('compliance_reports') }}">OSCAP Reports</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('archived_reports') }}">Archived OSCAP Reports</a></li>
-                </ul>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('upgrade_status') }}">Upgrade Status</a></li>
+            
+            <li class="nav-item nav-category fw-bold text-uppercase mt-3">Compliance</li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('compliance_reports') }}">OSCAP Reports</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('archived_reports') }}">Archived OSCAP Reports</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('upgrade_status') }}">Patch Supporting Infrastructure</a></li>
+            <li class="nav-item nav-category fw-bold text-uppercase mt-3">AI</li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('chatbot_route') }}">Llama3 Chatbot</a></li>
         </ul>
         <ul class="nav flex-column mt-auto">
             <li class="nav-item"><a class="nav-link" href="{{ url_for('change_password') }}">Change Password</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
         </ul>
     </div>
 
     <div class="main-content">
         <div class="container-fluid mt-4">
+            <div class="d-flex justify-content-end align-items-center mb-3">
+                <a href="{{ url_for('readme') }}" onclick="window.open(this.href, 'readme', 'width=800,height=700,left=200,top=200'); return false;" class="btn btn-outline-secondary btn-sm me-2">README</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+            </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -55,6 +56,7 @@
     </div>
 
     {% include '_modal.html' %}
+    {% include '_reboot_modal.html' %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block scripts %}{% endblock %}

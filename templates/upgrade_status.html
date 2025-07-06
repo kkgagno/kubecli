@@ -1,41 +1,66 @@
 {% extends 'base.html' %}
 
-{% block title %}Upgrade Status{% endblock %}
+{% block title %}Patch Supporting Infrastructure{% endblock %}
 
 {% block content %}
-    <h1>Upgrade Status</h1>
+    <h1>Patch Supporting Infrastructure</h1>
+    <div class="alert alert-info" role="alert">
+        <strong>Note:</strong> Kubernetes nodes must be cordoned, patched and rebooted on the <a href="{{ url_for('get_nodes') }}" class="alert-link">Nodes page</a>.
+    </div>
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <button type="button" class="btn" id="patch-selected-security" style="background-color: #E65100; color: white;">Patch Selected (Security)</button>
+            <button type="button" class="btn btn-warning" id="patch-selected-non-security">Patch Selected (Non-Security)</button>
+        </div>
+        <div>
+            <button type="button" class="btn btn-secondary" id="refresh-data">Refresh Data</button>
+            <button type="button" class="btn btn-danger" id="reboot-selected">Reboot Selected</button>
+        </div>
+    </div>
     <table class="table table-striped">
         <thead>
             <tr>
+                <th><input type="checkbox" id="select-all"></th>
                 <th>Hostname</th>
                 <th>Status</th>
+                <th>OS</th>
+                <th>Uptime</th>
+                <th>Reboot Required</th>
                 <th class="text-center">Informational</th>
-                <th class="text-center">Actions</th>
             </tr>
         </thead>
         <tbody id="hosts-table-body">
-            {% for host in hosts_list %}
-            {% if host != 'nginx' and 'endpoint' not in host %}
-            <tr id="host-row-{{ host }}">
-                <td>{{ host }}</td>
-                <td id="status-{{ host }}">
+            {% for host in hosts_data %}
+            {% if host.name != 'nginx' and 'endpoint' not in host.name %}
+            <tr id="host-row-{{ host.name }}">
+                <td><input type="checkbox" class="host-checkbox" data-hostname="{{ host.name }}" data-is-kubernetes-node="{{ host.is_kubernetes_node }}"></td>
+                <td>
+                    {{ host.name }}
+                    {% if host.is_kubegui_controller %}
+                        <span class="badge bg-primary">KubeGUI Controller</span>
+                    {% endif %}
+                </td>
+                <td id="status-{{ host.name }}">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     Checking...
                 </td>
-                <td class="text-center" style="white-space: nowrap;">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-url="{{ url_for('get_updates', hostname=host, update_type='security') }}" data-title="Security Updates for {{ host }}" disabled>
-                            Security Updates
-                        </button>
-                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-url="{{ url_for('get_updates', hostname=host, update_type='other') }}" data-title="Other Updates for {{ host }}" disabled>
-                            Other Updates
-                        </button>
-                    </div>
+                <td id="os-{{ host.name }}">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </td>
+                <td id="uptime-{{ host.name }}">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </td>
+                <td id="reboot-required-{{ host.name }}">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 </td>
                 <td class="text-center" style="white-space: nowrap;">
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-danger btn-sm patch-button" data-hostname="{{ host }}" data-patch-type="security" disabled>Patch Security</button>
-                        <button type="button" class="btn btn-warning btn-sm patch-button" data-hostname="{{ host }}" data-patch-type="non-security" disabled>Patch Non-Security</button>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-url="{{ url_for('get_updates', hostname=host.name, update_type='security') }}" data-title="Security Updates for {{ host.name }}" disabled>
+                            Security Updates
+                        </button>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-url="{{ url_for('get_updates', hostname=host.name, update_type='other') }}" data-title="Other Updates for {{ host.name }}" disabled>
+                            Other Updates
+                        </button>
                     </div>
                 </td>
             </tr>
@@ -43,25 +68,131 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Generic Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p id="confirmationModalText"></p>
+            <ul id="confirmation-nodes-list"></ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirm-action-btn">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const hosts = {{ hosts_list | tojson }};
+    const hosts = {{ hosts_data | tojson }};
+    const rebootButton = document.getElementById('reboot-selected');
+
+    function updateRebootButtonState() {
+        const selectedKubeNode = Array.from(document.querySelectorAll('.host-checkbox:checked')).some(cb => cb.dataset.isKubernetesNode === 'True');
+        rebootButton.disabled = selectedKubeNode;
+    }
+
+    document.getElementById('select-all').addEventListener('change', function(e) {
+        document.querySelectorAll('.host-checkbox').forEach(checkbox => {
+            checkbox.checked = e.target.checked;
+        });
+        updateRebootButtonState();
+    });
+
+    document.querySelectorAll('.host-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateRebootButtonState);
+    });
+
+    document.getElementById('refresh-data').addEventListener('click', function() {
+        location.reload();
+    });
+
+    document.getElementById('patch-selected-security').addEventListener('click', function() {
+        showConfirmationModal('patch-security', 'patch security updates');
+    });
+
+    document.getElementById('patch-selected-non-security').addEventListener('click', function() {
+        showConfirmationModal('patch-non-security', 'patch non-security updates');
+    });
+
+    rebootButton.addEventListener('click', function() {
+        showConfirmationModal('reboot', 'reboot');
+    });
+
+    function rebootSelected() {
+        const selectedHosts = Array.from(document.querySelectorAll('.host-checkbox:checked')).map(cb => cb.dataset.hostname);
+        if (selectedHosts.length === 0) {
+            alert('Please select at least one host.');
+            return;
+        }
+
+        fetch('/reboot_selected', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ hosts: selectedHosts })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while rebooting the hosts.');
+        });
+    }
+
+    function patchSelected(patchType) {
+        const selectedHosts = Array.from(document.querySelectorAll('.host-checkbox:checked')).map(cb => cb.dataset.hostname);
+        if (selectedHosts.length === 0) {
+            alert('Please select at least one host.');
+            return;
+        }
+
+        selectedHosts.forEach(hostname => {
+            const statusCell = document.getElementById(`status-${hostname}`);
+            statusCell.innerHTML = '<span class="badge bg-info">Patching...</span>';
+            fetch(`/run_patch/${hostname}/${patchType}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.task_id) {
+                        pollTaskStatus(data.task_id, statusCell);
+                    } else {
+                        statusCell.innerHTML = '<span class="badge bg-danger">Error</span>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusCell.innerHTML = '<span class="badge bg-danger">Error</span>';
+                });
+        });
+    }
 
     hosts.forEach(host => {
-        if (host === 'nginx' || host.includes('endpoint')) {
+        if (host.name === 'nginx' || host.name.includes('endpoint')) {
             return;
         }
         
-        const statusCell = document.getElementById(`status-${host}`);
-        const row = document.getElementById(`host-row-${host}`);
+        const statusCell = document.getElementById(`status-${host.name}`);
+        const osCell = document.getElementById(`os-${host.name}`);
+        const uptimeCell = document.getElementById(`uptime-${host.name}`);
+        const rebootRequiredCell = document.getElementById(`reboot-required-${host.name}`);
+        const row = document.getElementById(`host-row-${host.name}`);
         const buttons = row.querySelectorAll('button');
 
         if (!statusCell) return;
 
-        fetch(`/get_host_status/${host}`)
+        fetch(`/get_host_status/${host.name}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -76,11 +207,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     statusCell.innerHTML = `<span class="badge bg-warning">${data.status}</span>`;
                 }
+                osCell.textContent = data.os_info || 'N/A';
+                uptimeCell.textContent = data.uptime || 'N/A';
+                if (data.reboot_required) {
+                    rebootRequiredCell.innerHTML = `<span class="badge bg-warning">Yes</span>`;
+                } else {
+                    rebootRequiredCell.innerHTML = `<span class="badge bg-success">No</span>`;
+                }
                 buttons.forEach(button => button.disabled = false);
             })
             .catch(error => {
-                console.error(`Error fetching status for ${host}:`, error);
+                console.error(`Error fetching status for ${host.name}:`, error);
                 statusCell.innerHTML = `<span class="badge bg-secondary">Error</span>`;
+                osCell.textContent = 'Error';
+                uptimeCell.textContent = 'Error';
+                rebootRequiredCell.innerHTML = `<span class="badge bg-secondary">Error</span>`;
             });
     });
 
@@ -131,6 +272,41 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
             }
         });
+    }
+
+    function showConfirmationModal(action, verb) {
+        const selectedHosts = Array.from(document.querySelectorAll('.host-checkbox:checked')).map(cb => cb.dataset.hostname);
+        if (selectedHosts.length === 0) {
+            alert('Please select at least one host.');
+            return;
+        }
+
+        const modalText = document.getElementById('confirmationModalText');
+        modalText.textContent = `Are you sure you want to ${verb} the following hosts?`;
+
+        const listElement = document.getElementById('confirmation-nodes-list');
+        listElement.innerHTML = '';
+        selectedHosts.forEach(host => {
+            const listItem = document.createElement('li');
+            listItem.textContent = host;
+            listElement.appendChild(listItem);
+        });
+
+        const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        const confirmBtn = document.getElementById('confirm-action-btn');
+
+        confirmBtn.onclick = function() {
+            if (action === 'patch-security') {
+                patchSelected('security');
+            } else if (action === 'patch-non-security') {
+                patchSelected('non-security');
+            } else if (action === 'reboot') {
+                rebootSelected();
+            }
+            confirmationModal.hide();
+        };
+        
+        confirmationModal.show();
     }
 
     document.querySelectorAll('.patch-button').forEach(button => {

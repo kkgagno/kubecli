@@ -1,0 +1,14 @@
+{% extends "base_readme.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>README</h1>
+        </div>
+        <div class="card-body">
+            {{ content|safe }}
+        </div>
+    </div>
+</div>
+{% endblock %}

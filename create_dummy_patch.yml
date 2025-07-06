@@ -1,0 +1,101 @@
+---
+- name: Create Dummy Security Patch
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - dpkg-dev
+          - apt-utils
+        state: present
+        update_cache: yes
+
+    - name: Create dummy package directory
+      file:
+        path: /tmp/dummy-security-pkg/DEBIAN
+        state: directory
+
+    - name: Create dummy package control file (v1.0)
+      copy:
+        dest: /tmp/dummy-security-pkg/DEBIAN/control
+        content: |
+          Package: dummy-security-patch
+          Version: 1.0
+          Architecture: all
+          Maintainer: Gemini <gemini@example.com>
+          Description: A dummy security patch for testing.
+
+    - name: Build dummy package v1.0
+      command: dpkg-deb --build /tmp/dummy-security-pkg /tmp/dummy-security-patch-1.0.deb
+
+    - name: Install dummy package v1.0
+      apt:
+        deb: /tmp/dummy-security-patch-1.0.deb
+        allow_downgrade: yes
+      
+    - name: Create dummy package control file (v2.0)
+      copy:
+        dest: /tmp/dummy-security-pkg/DEBIAN/control
+        content: |
+          Package: dummy-security-patch
+          Version: 2.0
+          Architecture: all
+          Maintainer: Gemini <gemini@example.com>
+          Description: A dummy security patch for testing.
+
+    - name: Build dummy package v2.0
+      command: dpkg-deb --build /tmp/dummy-security-pkg /tmp/dummy-security-patch-2.0.deb
+
+    - name: Create local repo directory
+      file:
+        path: /usr/local/share/dummy-repo
+        state: directory
+
+    - name: Copy dummy package v2.0 to repo
+      copy:
+        src: /tmp/dummy-security-patch-2.0.deb
+        dest: /usr/local/share/dummy-repo/dummy-security-patch-2.0.deb
+        remote_src: yes
+
+    - name: Generate Packages file
+      shell: "cd /usr/local/share/dummy-repo && dpkg-scanpackages . /dev/null > Packages"
+      args:
+        executable: /bin/bash
+
+    - name: Create Release file
+      shell: 'cd /usr/local/share/dummy-repo && apt-ftparchive release . > Release'
+      args:
+        executable: /bin/bash
+
+    - name: Add Origin to Release file
+      lineinfile:
+        path: /usr/local/share/dummy-repo/Release
+        line: 'Origin: dummy-security-repo'
+        insertbefore: '^Label:'
+        
+    - name: Add repo to sources.list
+      copy:
+        dest: /etc/apt/sources.list.d/dummy-repo.list
+        content: 'deb [trusted=yes] file:/usr/local/share/dummy-repo ./'
+
+    - name: Configure unattended-upgrades
+      copy:
+        dest: /etc/apt/apt.conf.d/99-dummy-unattended-upgrades
+        content: |
+          Unattended-Upgrade::Origins-Pattern {
+            "origin=dummy-security-repo";
+          };
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        
+    - name: Clean up temporary files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/dummy-security-pkg
+        - /tmp/dummy-security-patch-1.0.deb
+        - /tmp/dummy-security-patch-2.0.deb

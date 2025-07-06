@@ -47,10 +47,25 @@
         </thead>
         <tbody>
             {% for pod in pods %}
+            {% set status = namespace(value=pod.status.phase) %}
+            {% set found_status = namespace(value=false) %}
+            {% if pod.status.container_statuses %}
+                {% for container in pod.status.container_statuses %}
+                    {% if not found_status.value %}
+                        {% if container.state.waiting %}
+                            {% set status.value = container.state.waiting.reason %}
+                            {% set found_status.value = true %}
+                        {% elif container.state.terminated %}
+                            {% set status.value = container.state.terminated.reason %}
+                            {% set found_status.value = true %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
             <tr>
                 <td>{{ pod.metadata.namespace }}</td>
                 <td>{{ pod.metadata.name }}</td>
-                <td>{{ pod.status.phase }}</td>
+                <td>{{ status.value }}</td>
                 <td>{{ pod.spec.node_name }}</td>
                 <td>{{ pod.age }}</td>
                 <td style="white-space: nowrap;">
@@ -60,9 +75,22 @@
                     <form action="{{ url_for('delete_pod', namespace=pod.metadata.namespace, pod_name=pod.metadata.name) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this pod?');">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>
+                    {% if pod.spec.containers|length > 1 %}
+                    <div class="btn-group" style="display: inline-block;">
+                        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            View Logs
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% for container in pod.spec.containers %}
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#describeModal" data-url="{{ url_for('pod_logs', namespace=pod.metadata.namespace, pod_name=pod.metadata.name, container=container.name) }}" data-title="Logs for Pod: {{ pod.metadata.name }} ({{ container.name }})">{{ container.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% else %}
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#describeModal" data-url="{{ url_for('pod_logs', namespace=pod.metadata.namespace, pod_name=pod.metadata.name) }}" data-title="Logs for Pod: {{ pod.metadata.name }}">
                         View Logs
                     </button>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

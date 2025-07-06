@@ -1,0 +1,16 @@
+---
+- name: Fix reboot delay and reboot the node
+  hosts: "{{ target_host }}"
+  gather_facts: false
+  become: yes
+
+  tasks:
+    - name: Kill all processes for user 1000
+      command: "pkill -u 1000"
+      async: 1
+      poll: 0
+      ignore_errors: yes
+
+    - name: Reboot the node
+      reboot:
+        reboot_timeout: 300

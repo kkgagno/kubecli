@@ -1,0 +1,11 @@
+---
+- name: Reboot localhost
+  hosts: localhost
+  gather_facts: false
+  become: yes
+
+  tasks:
+    - name: Reboot the machine
+      shell: "sleep 2 && reboot"
+      async: 1
+      poll: 0

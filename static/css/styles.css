@@ -1,6 +1,11 @@
 /* styles.css */
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('../fonts/bitcount.css');
+
+.fancy-font {
+    font-family: 'Bitcount Grid Double', sans-serif;
+}
 
 body {
     background: #161a25;
@@ -29,6 +34,7 @@ body {
     text-align: center;
     margin-bottom: 20px;
     text-decoration: none;
+    font-family: 'Bitcount Grid Double', sans-serif;
 }
 
 .main-content {
@@ -122,6 +128,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
     color: #00c4a3;
     text-transform: uppercase;
+    font-family: 'Bitcount Grid Double', sans-serif;
 }
 
 a {

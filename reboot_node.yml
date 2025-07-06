@@ -1,0 +1,10 @@
+---
+- name: Reboot a single node
+  hosts: "{{ target_host }}"
+  gather_facts: false
+  become: yes
+
+  tasks:
+    - name: Reboot the node and wait for it to come back
+      reboot:
+        reboot_timeout: 300 # 5 minutes

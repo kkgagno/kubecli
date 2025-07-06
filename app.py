@@ -8,19 +8,29 @@ import pytz
 import re
 import subprocess
 import threading # Import threading
+import time
 import uuid # Import uuid
+import zipfile
 from flask import Flask, render_template, Response, redirect, url_for, request, flash, session, send_from_directory, jsonify, make_response
 import pdfkit
 from bs4 import BeautifulSoup
 import csv
 from io import StringIO
 from werkzeug.security import generate_password_hash, check_password_hash
+import markdown
 from functools import wraps
 from kubernetes import client, config
 import paramiko
+import socket
+from cleanup import cleanup_old_files
+from transformers import pipeline
+
+# Initialize the chatbot pipeline
+chatbot = pipeline("text-generation", model="meta-llama/Llama-3-8B")
 
 app = Flask(__name__)
 app.secret_key = '3727fc9d59984122d856c7faa4b9078cf2ec7a74b857f62c' # Required for flash messages
+app.config['SESSION_COOKIE_NAME'] = 'simple_kube_session'
 
 @app.context_processor
 def inject_now():
@@ -61,41 +71,61 @@ def login_required(f):
 
 import logging
 
-logging.basicConfig(filename='/tmp/ansible_playbook.log', level=logging.INFO)
+logging.basicConfig(filename='app.log', level=logging.INFO)
 
 def generate_detailed_oscap_csv():
     xml_dir = os.path.join(os.path.dirname(__file__), 'tmp_reports')
-    csv_path = os.path.join(app.static_folder, 'oscap_reports', 'oscap_detailed_summary.csv')
+    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
     
+    if not os.path.exists(reports_dir):
+        os.makedirs(reports_dir)
+
+    # Use a fixed name for the main CSV and a timestamped name for the archive
+    main_csv_filename = "oscap_detailed_summary.csv"
+    main_csv_path = os.path.join(reports_dir, main_csv_filename)
+    
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    archive_csv_filename = f"{timestamp}_oscap_detailed_summary.csv"
+    archive_csv_path = os.path.join(reports_dir, archive_csv_filename)
+
     summary_data = [['Hostname', 'Rule ID', 'Severity', 'Result']]
 
-    for filename in os.listdir(xml_dir):
-        if not filename.endswith('.xml'):
-            continue
+    if os.path.exists(xml_dir):
+        for filename in os.listdir(xml_dir):
+            if not filename.endswith('.xml'):
+                continue
 
-        hostname = filename.replace('scan-results-', '').replace('.xml', '')
-        xml_path = os.path.join(xml_dir, filename)
+            hostname = filename.replace('scan-results-', '').replace('.xml', '')
+            xml_path = os.path.join(xml_dir, filename)
 
-        with open(xml_path, 'r') as f:
-            soup = BeautifulSoup(f, 'xml')
+            with open(xml_path, 'r') as f:
+                soup = BeautifulSoup(f, 'xml')
 
-        all_rules = soup.find_all('Rule')
-        results = soup.find_all('rule-result')
+            all_rules = soup.find_all('Rule')
+            results = soup.find_all('rule-result')
+            
+            rules_info = {rule['id']: rule['severity'] for rule in all_rules if 'severity' in rule.attrs}
+
+            for result in results:
+                rule_id = result['idref']
+                severity = rules_info.get(rule_id, 'N/A')
+                res = result.find('result').text
+                summary_data.append([hostname, rule_id, severity, res])
+
+    # Write to the main, fixed-name CSV
+    with open(main_csv_path, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerows(summary_data)
         
-        rules_info = {rule['id']: rule['severity'] for rule in all_rules if 'severity' in rule.attrs}
-
-        for result in results:
-            rule_id = result['idref']
-            severity = rules_info.get(rule_id, 'N/A')
-            res = result.find('result').text
-            summary_data.append([hostname, rule_id, severity, res])
-
-    with open(csv_path, 'w', newline='') as f:
+    # Also write to the timestamped archive CSV
+    with open(archive_csv_path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(summary_data)
 
-def run_ansible_playbook_async(task_id, task_type, playbook_path, inventory_path, extra_vars=None, limit=None):
-    running_tasks[task_id] = {'status': 'running', 'output': '', 'type': task_type}
+def run_ansible_playbook_async(task_id, task_type, playbook_path, inventory_path, extra_vars=None, limit=None, chained_task=False):
+    if not chained_task:
+        running_tasks[task_id] = {'status': 'running', 'output': '', 'type': task_type}
+    
     command = [
         os.path.join(os.path.dirname(__file__), 'venv/bin/ansible-playbook'),
         '-i', inventory_path,
@@ -105,14 +135,13 @@ def run_ansible_playbook_async(task_id, task_type, playbook_path, inventory_path
         '--extra-vars', 'ansible_python_interpreter=/usr/bin/python3'
     ]
     if limit:
-        command.extend(['--limit', limit])
+        command.extend(['--limit', f"{limit},localhost"])
     if extra_vars:
         for key, value in extra_vars.items():
             command.extend(['--extra-vars', f'{key}={value}'])
     command.append(playbook_path)
 
     log_file_path = os.path.join(os.path.dirname(__file__), "ansible_command.log")
-    tmp_reports_dir = os.path.join(os.path.dirname(__file__), 'tmp_reports')
 
     def worker():
         with open(log_file_path, "w") as f:
@@ -129,11 +158,7 @@ def run_ansible_playbook_async(task_id, task_type, playbook_path, inventory_path
             process.stdout.close()
             return_code = process.wait()
 
-            if return_code == 0:
-                running_tasks[task_id]['status'] = 'completed'
-                if task_type == 'oscap':
-                    generate_detailed_oscap_csv()
-            else:
+            if return_code != 0:
                 running_tasks[task_id]['status'] = 'failed'
                 error_message = f"\nPlaybook failed with exit code {return_code}."
                 running_tasks[task_id]['output'] += error_message
@@ -149,60 +174,74 @@ def run_ansible_playbook_async(task_id, task_type, playbook_path, inventory_path
 
     thread = threading.Thread(target=worker)
     thread.start()
-
-import socket
+    return thread
 
 @app.route('/run_oscap_scan', methods=['POST'])
 @login_required
 def run_oscap_scan():
     for task_id, task_info in running_tasks.items():
         if task_info.get('type') == 'oscap' and task_info.get('status') == 'running':
-            return jsonify({'message': 'OpenSCAP scan is already running.'}), 409
+            hosts = task_info.get('hosts', [])
+            return jsonify({'message': f'OpenSCAP scan is already running on the following hosts: {", ".join(hosts)}'}), 409
 
+    selected_hosts = request.form.getlist('selected_hosts')
+    if not selected_hosts:
+        return jsonify({'message': 'No hosts selected for the scan.'}), 400
+
+    limit = ",".join(selected_hosts)
     task_id = str(uuid.uuid4())
-    playbook_path = os.path.join(os.path.dirname(__file__), 'ansible_oscap_scan', 'oscap_scan.yml')
     
-    # --- Cleanup and Archiving ---
-    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
-    archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
-    tmp_reports_dir = os.path.join(os.path.dirname(__file__), 'tmp_reports')
-    now = datetime.datetime.now()
-    
-    # 1. Archive old HTML reports
-    if not os.path.exists(archive_dir):
-        os.makedirs(archive_dir)
-    if os.path.exists(reports_dir):
-        for filename in os.listdir(reports_dir):
-            if filename.endswith('.html'):
-                report_path = os.path.join(reports_dir, filename)
-                archive_path = os.path.join(archive_dir, f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_{filename}")
-                os.rename(report_path, archive_path)
-
-    # 2. Enforce retention policy on archived reports
-    for filename in os.listdir(archive_dir):
-        archive_path = os.path.join(archive_dir, filename)
-        try:
-            file_time_str = filename.split('_')[0]
-            file_time = datetime.datetime.strptime(file_time_str, '%Y-%m-%d')
-            if (now - file_time).days > 10:
-                os.remove(archive_path)
-        except (ValueError, IndexError):
-            # Handle files that don't match the expected naming convention
-            pass
-
-    # 3. Clear old XML reports from tmp
-    if os.path.exists(tmp_reports_dir):
-        for filename in os.listdir(tmp_reports_dir):
-            if filename.endswith('.xml'):
-                os.remove(os.path.join(tmp_reports_dir, filename))
-    else:
-        os.makedirs(tmp_reports_dir)
-    # --- End Cleanup ---
-
     inventory_path = os.path.join(os.path.dirname(__file__), 'inventory.ini')
-    thread = threading.Thread(target=run_ansible_playbook_async, args=(task_id, 'oscap', playbook_path, inventory_path))
+    scan_playbook_path = os.path.join(os.path.dirname(__file__), 'ansible_oscap_scan', 'oscap_scan.yml')
+    report_playbook_path = os.path.join(os.path.dirname(__file__), 'ansible_oscap_scan', 'generate_reports.yml')
+
+    def worker():
+        # Start the main task
+        running_tasks[task_id] = {'status': 'running', 'output': 'Starting OpenSCAP scan...\n', 'type': 'oscap', 'hosts': selected_hosts}
+        
+        # Run the scan playbook
+        scan_thread = run_ansible_playbook_async(task_id, 'oscap', scan_playbook_path, inventory_path, None, limit, chained_task=True)
+        scan_thread.join() # Wait for the scan to complete
+        
+        # Check if the scan was successful
+        if running_tasks.get(task_id, {}).get('status') == 'failed':
+            return # Stop if the scan failed
+
+        running_tasks[task_id]['output'] += '\nScan complete. Generating reports...\n'
+
+        # Run the report generation playbook
+        report_thread = run_ansible_playbook_async(task_id, 'oscap', report_playbook_path, inventory_path, None, None, chained_task=True)
+        report_thread.join() # Wait for report generation to complete
+
+        # Check if report generation was successful
+        if running_tasks.get(task_id, {}).get('status') == 'failed':
+            return # Stop if report generation failed
+
+        # If all steps are successful, mark as completed_and_reloaded
+        running_tasks[task_id]['status'] = 'completed_and_reloaded'
+        generate_detailed_oscap_csv()
+
+    thread = threading.Thread(target=worker)
     thread.start()
-    return jsonify({'task_id': task_id, 'message': 'OpenSCAP scan started.'}), 202
+    flash('OpenSCAP scan and report generation started.', 'info')
+    return redirect(url_for('compliance_reports'))
+
+
+import socket
+
+def get_inventory_hosts():
+    inventory_path = os.path.join(os.path.dirname(__file__), 'inventory.ini')
+    hosts = set()
+    try:
+        with open(inventory_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and not line.startswith('['):
+                    hostname = line.split(' ')[0]
+                    hosts.add(hostname)
+        return sorted(list(hosts))
+    except FileNotFoundError:
+        return []
 
 
 @app.route('/run_report_playbook', methods=['POST'])
@@ -271,6 +310,14 @@ def playbook_output(task_id):
         return render_template('playbook_output.html', task=task)
     return "Task not found or output not available.", 404
 
+@app.route('/readme')
+@login_required
+def readme():
+    with open('README.md', 'r') as f:
+        content = f.read()
+    html_content = markdown.markdown(content)
+    return render_template('readme.html', content=html_content)
+
 @app.route('/login', methods=['GET', 'POST'])
 
 def login():
@@ -290,6 +337,7 @@ def login():
                 # Password file exists, check against hash
                 if check_password_hash(stored_password_hash, entered_password):
                     session['logged_in'] = True
+                    session.permanent = False
                     return redirect(url_for('index'))
                 else:
                     flash('Invalid credentials', 'error')
@@ -297,6 +345,7 @@ def login():
                 # No password file, allow blank password
                 if entered_password == '':
                     session['logged_in'] = True
+                    session.permanent = False
                     return redirect(url_for('index'))
                 else:
                     flash('Invalid credentials', 'error')
@@ -398,16 +447,40 @@ def pod_logs(namespace, pod_name):
         return "Unauthorized", 401
     container_name = request.args.get('container')
     try:
-        if container_name:
-            logs = core_api.read_namespaced_pod_log(name=pod_name, namespace=namespace, container=container_name)
-        else:
-            logs = core_api.read_namespaced_pod_log(name=pod_name, namespace=namespace)
+        # Determine the container name if not specified
+        if not container_name:
+            pod = core_api.read_namespaced_pod(name=pod_name, namespace=namespace)
+            if pod.spec.containers:
+                container_name = pod.spec.containers[0].name
+            else:
+                return "No containers found in the pod.", 404
+
+        # Fetch logs
+        logs = core_api.read_namespaced_pod_log(name=pod_name, namespace=namespace, container=container_name)
         
+        # Check if logs are empty
+        if not logs or not logs.strip():
+            logs = "No logs available for this container."
+
         response = make_response(logs)
         response.headers['Content-Type'] = 'text/plain'
         return response
+        
+    except client.ApiException as e:
+        try:
+            # Try to parse the error body for a more specific message
+            error_body = json.loads(e.body)
+            error_message = error_body.get('message', str(e))
+        except (json.JSONDecodeError, AttributeError):
+            error_message = str(e)
+        
+        # Provide a clear error message to the frontend
+        final_message = f"Error fetching logs for pod '{pod_name}' (container: '{container_name}'): {error_message}"
+        return final_message, 500
+        
     except Exception as e:
-        return f"Error fetching logs for pod {pod_name} in namespace {namespace}: {e}"
+        app.logger.error(f"An unexpected error occurred in pod_logs: {e}", exc_info=True)
+        return f"An unexpected error occurred: {e}", 500
 
 @app.route('/delete_pod/<namespace>/<pod_name>', methods=['POST'])
 @login_required
@@ -529,26 +602,24 @@ def get_services():
 @app.route('/cordon_node/<node_name>', methods=['POST'])
 @login_required
 def cordon_node(node_name):
-    policy_api = client.PolicyV1Api()
     try:
-        # Cordon the node
         body = {
             "spec": {
                 "unschedulable": True
             }
         }
         core_api.patch_node(name=node_name, body=body)
-        flash(f"Node {node_name} cordoned successfully.", 'success')
-
+        
         # Evict pods from the node
         pods = core_api.list_pod_for_all_namespaces(field_selector=f'spec.nodeName=={node_name}')
-        evicted_count = 0
+        evicted_pods = []
+        ignored_pods = []
+        errors = []
         for pod in pods.items:
-            # Skip DaemonSet pods
             if pod.metadata.owner_references and any(
                 owner.kind == "DaemonSet" for owner in pod.metadata.owner_references
             ):
-                print(f"Skipping DaemonSet pod: {pod.metadata.name}")
+                ignored_pods.append(f"{pod.metadata.namespace}/{pod.metadata.name}")
                 continue
 
             eviction_body = client.V1Eviction(
@@ -563,20 +634,67 @@ def cordon_node(node_name):
                     namespace=pod.metadata.namespace,
                     body=eviction_body
                 )
-                evicted_count += 1
-                print(f"Evicted pod: {pod.metadata.name} from namespace: {pod.metadata.namespace}")
+                evicted_pods.append(f"{pod.metadata.namespace}/{pod.metadata.name}")
             except client.ApiException as e:
-                print(f"Error evicting pod {pod.metadata.name}: {e}")
-                flash(f"Error evicting pod {pod.metadata.name}: {e}", 'error')
+                errors.append(f"Error evicting pod {pod.metadata.name}: {e.reason}")
         
-        if evicted_count > 0:
-            flash(f"Successfully evicted {evicted_count} pods from node {node_name}.", 'success')
-        else:
-            flash(f"No non-DaemonSet pods to evict from node {node_name}.", 'info')
-
+        if errors:
+            return jsonify({'status': 'error', 'message': f'Node {node_name} cordoned, but failed to drain all pods.', 'errors': errors, 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods}), 500
+        return jsonify({'status': 'success', 'message': f'Node {node_name} cordoned and drained successfully.', 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods})
     except Exception as e:
-        flash(f"Error draining node {node_name}: {e}", 'error')
-    return redirect(url_for('get_nodes'))
+        return jsonify({'status': 'error', 'message': f'Error cordoning node {node_name}: {e}'}), 500
+
+@app.route('/cordon_node_only/<node_name>', methods=['POST'])
+@login_required
+def cordon_node_only(node_name):
+    try:
+        body = {
+            "spec": {
+                "unschedulable": True
+            }
+        }
+        core_api.patch_node(name=node_name, body=body)
+        return jsonify({'status': 'success', 'message': f'Node {node_name} cordoned successfully.'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Error cordoning node {node_name}: {e}'}), 500
+
+@app.route('/drain_node/<node_name>', methods=['POST'])
+@login_required
+def drain_node(node_name):
+    try:
+        # Evict pods from the node
+        pods = core_api.list_pod_for_all_namespaces(field_selector=f'spec.nodeName=={node_name}')
+        evicted_pods = []
+        ignored_pods = []
+        errors = []
+        for pod in pods.items:
+            if pod.metadata.owner_references and any(
+                owner.kind == "DaemonSet" for owner in pod.metadata.owner_references
+            ):
+                ignored_pods.append(f"{pod.metadata.namespace}/{pod.metadata.name}")
+                continue
+
+            eviction_body = client.V1Eviction(
+                metadata=client.V1ObjectMeta(
+                    name=pod.metadata.name,
+                    namespace=pod.metadata.namespace
+                )
+            )
+            try:
+                core_api.create_namespaced_pod_eviction(
+                    name=pod.metadata.name,
+                    namespace=pod.metadata.namespace,
+                    body=eviction_body
+                )
+                evicted_pods.append(f"{pod.metadata.namespace}/{pod.metadata.name}")
+            except client.ApiException as e:
+                errors.append(f"Error evicting pod {pod.metadata.name}: {e.reason}")
+        
+        if errors:
+            return jsonify({'status': 'error', 'message': f'Failed to drain all pods from {node_name}.', 'errors': errors, 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods}), 500
+        return jsonify({'status': 'success', 'message': f'Node {node_name} drained successfully.', 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Error draining node {node_name}: {e}'}), 500
 
 @app.route('/uncordon_node/<node_name>', methods=['POST'])
 @login_required
@@ -588,36 +706,23 @@ def uncordon_node(node_name):
             }
         }
         core_api.patch_node(name=node_name, body=body)
-        flash(f"Node {node_name} uncordoned successfully.", 'success')
+        return jsonify({'status': 'success', 'message': f'Node {node_name} uncordoned successfully.'})
     except Exception as e:
-        flash(f"Error uncordoning node {node_name}: {e}", 'error')
-    return redirect(url_for('get_nodes'))
+        return jsonify({'status': 'error', 'message': f'Error uncordoning node {node_name}: {e}'}), 500
 
 @app.route('/reboot_node/<node_name>', methods=['POST'])
 @login_required
 def reboot_node(node_name):
-    try:
-        node = core_api.read_node(name=node_name)
-        node_ip = None
-        for address in node.status.addresses:
-            if address.type == 'InternalIP':
-                node_ip = address.address
-                break
-        
-        if not node_ip:
-            flash(f"Could not get internal IP for node {node_name}", 'error')
-            return redirect(url_for('get_nodes'))
-
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(node_ip, username=SSH_USERNAME, key_filename=SSH_KEY_PATH)
-        stdin, stdout, stderr = ssh.exec_command('sudo shutdown -r now')
-        stdout.channel.recv_exit_status()
-        ssh.close()
-        flash(f"Reboot command issued for node {node_name}.", 'success')
-    except Exception as e:
-        flash(f"Error rebooting node {node_name}: {e}", 'error')
-    return redirect(url_for('get_nodes'))
+    """Reboots a node using an Ansible playbook."""
+    task_id = str(uuid.uuid4())
+    playbook_path = os.path.join(os.path.dirname(__file__), 'reboot_node.yml')
+    inventory_path = os.path.join(os.path.dirname(__file__), 'inventory.ini')
+    
+    extra_vars = {'target_host': node_name}
+    
+    run_ansible_playbook_async(task_id, 'reboot', playbook_path, inventory_path, extra_vars=extra_vars)
+    
+    return jsonify({'task_id': task_id, 'message': f'Reboot initiated for {node_name}.'}), 202
 
 @app.route('/check_reboot_required/<node_name>')
 @login_required
@@ -684,20 +789,9 @@ def get_nodes():
         if search_query:
             nodes.items = [node for node in nodes.items if search_query.lower() in node.metadata.name.lower()]
 
+        nodes_list = []
         for node in nodes.items:
-            node.reboot_required = False
-            node.hours_since_reboot = "N/A"
-            node.status_display = "Unknown" # Initialize status display
-            node.hours_since_reboot = "N/A" # Initialize hours since reboot
-
-            # Add the node description YAML
-            try:
-                described_node = core_api.read_node(name=node.metadata.name, _preload_content=False)
-                node.description_yaml = yaml.dump(yaml.safe_load(described_node.data))
-            except Exception as e:
-                node.description_yaml = f"Error describing node: {e}"
-
-            # Determine node status (Ready/NotReady, SchedulingDisabled)
+            status_display = "Unknown"
             if node.status and node.status.conditions:
                 ready_status = "Unknown"
                 for condition in node.status.conditions:
@@ -710,51 +804,89 @@ def get_nodes():
                 
                 if node.spec and node.spec.unschedulable:
                     if ready_status == "Ready":
-                        node.status_display = "Ready,SchedulingDisabled"
+                        status_display = "Ready,SchedulingDisabled"
                     else:
-                        node.status_display = f"{ready_status},SchedulingDisabled"
+                        status_display = f"{ready_status},SchedulingDisabled"
                 else:
-                    node.status_display = ready_status
+                    status_display = ready_status
+            
+            roles = [label.split('/')[1] for label, value in node.metadata.labels.items() if 'node-role.kubernetes.io/' in label]
 
-            try:
-                node_ip = None
-                for address in node.status.addresses:
-                    if address.type == 'InternalIP':
-                        node_ip = address.address
-                        break
-                
-                if not node_ip:
-                    continue
+            nodes_list.append({
+                'name': node.metadata.name,
+                'status': status_display,
+                'roles': ", ".join(roles),
+                'os_image': node.status.node_info.os_image,
+                'unschedulable': node.spec.unschedulable
+            })
 
-                ssh = paramiko.SSHClient()
-                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                ssh.connect(node_ip, username=SSH_USERNAME, key_filename=SSH_KEY_PATH)
-                
-                # Check for reboot required file
-                stdin, stdout, stderr = ssh.exec_command('if [ -f /var/run/reboot-required ]; then echo "reboot required"; fi')
-                reboot_status = stdout.read().decode('utf-8').strip()
-                if reboot_status == "reboot required":
-                    node.reboot_required = True
-
-                # Get last reboot time
-                stdin, stdout, stderr = ssh.exec_command('uptime -s')
-                last_reboot_time_str = stdout.read().decode('utf-8').strip()
-                if last_reboot_time_str:
-                    last_reboot_time = datetime.datetime.strptime(last_reboot_time_str, '%Y-%m-%d %H:%M:%S')
-                    now = datetime.datetime.now()
-                    minutes_since_reboot = (now - last_reboot_time).total_seconds() / 60
-                    node.minutes_since_reboot = minutes_since_reboot
-
-                ssh.close()
-
-            except Exception as e:
-                print(f"Could not check reboot status for node {node.metadata.name}: {e}")
-
-
-        return render_template('nodes.html', nodes=nodes.items, search_query=search_query)
+        return render_template('nodes.html', nodes=nodes_list, search_query=search_query)
     except Exception as e:
         flash(f"Error fetching nodes: {e}", 'error')
         return render_template('nodes.html', nodes=[], search_query=search_query)
+
+@app.route('/get_node_details/<node_name>')
+@login_required
+def get_node_details(node_name):
+    """
+    Gets node details using the Kubernetes API and SSH.
+    """
+    try:
+        node = core_api.read_node(name=node_name, pretty=True)
+        ready_condition = next((c for c in node.status.conditions if c.type == 'Ready'), None)
+
+        if ready_condition and ready_condition.status == 'True':
+            uptime = "N/A"
+            reboot_required = False
+            patch_status = 'No patches needed'
+            try:
+                ssh, _ = get_ssh_connection(node_name)
+                if ssh == 'local':
+                    # Local connection
+                    uptime_process = subprocess.run(['uptime', '-p'], capture_output=True, text=True, check=False)
+                    if uptime_process.returncode == 0:
+                        uptime = uptime_process.stdout.strip().replace('up ', '')
+                    reboot_required = os.path.exists('/var/run/reboot-required')
+                    sec_process = subprocess.run(['sudo', 'unattended-upgrades', '--dry-run'], capture_output=True, text=True, check=False)
+                    security_output = sec_process.stdout + sec_process.stderr
+                    if "/usr/bin/dpkg" in security_output and "--unpack" in security_output:
+                        patch_status = 'Patches needed'
+                else:
+                    # Remote connection via SSH
+                    try:
+                        stdin, stdout, stderr = ssh.exec_command('uptime -p')
+                        uptime_output = stdout.read().decode('utf-8').strip()
+                        if uptime_output:
+                            uptime = uptime_output.replace('up ', '')
+
+                        stdin, stdout, stderr = ssh.exec_command('if [ -f /var/run/reboot-required ]; then echo "reboot required"; fi')
+                        reboot_status = stdout.read().decode('utf-8').strip()
+                        reboot_required = reboot_status == "reboot required"
+
+                        stdin, stdout, stderr = ssh.exec_command('sudo unattended-upgrades --dry-run')
+                        security_output = stdout.read().decode('utf-8') + stderr.read().decode('utf-8')
+                        if "/usr/bin/dpkg" in security_output and "--unpack" in security_output:
+                            patch_status = 'Patches needed'
+                    finally:
+                        ssh.close()
+            except Exception as e:
+                app.logger.error(f"Failed to get details via SSH for {node_name}: {e}")
+                pass  # Keep uptime as N/A if SSH fails
+
+            return jsonify({
+                'status': 'online',
+                'reboot_required': reboot_required,
+                'uptime': uptime,
+                'patch_status': patch_status
+            })
+        else:
+            return jsonify({'status': 'rebooting', 'uptime': 'N/A', 'patch_status': 'Unknown', 'reboot_required': False})
+
+    except client.ApiException:
+        return jsonify({'status': 'rebooting', 'uptime': 'N/A', 'patch_status': 'Unknown', 'reboot_required': False})
+    except Exception as e:
+        app.logger.error(f"Unexpected error in get_node_details for {node_name}: {e}", exc_info=True)
+        return jsonify({'error': 'An unexpected error occurred.', 'uptime': 'Error', 'patch_status': 'Error', 'reboot_required': False})
 
 @app.route('/persistentvolumeclaims')
 @login_required
@@ -1059,46 +1191,184 @@ def get_helm_chart_resources(namespace, name):
 @login_required
 def compliance_reports():
     reports_dir = os.path.join(app.static_folder, 'oscap_reports')
-    default_report = 'aggregated_oscap_report.html'
+    archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
+    hosts_list = get_inventory_hosts()
+    
+    all_reports = []
+    
+    # Get reports from the main directory
     try:
-        reports = sorted([f for f in os.listdir(reports_dir) if f.endswith('.html')])
-        if not reports:
-            default_report = None
-        elif default_report not in reports:
-            default_report = reports[0]
-            
-        return render_template(
-            'compliance_reports.html', 
-            reports=reports, 
-            default_report=default_report
-        )
+        for f in os.listdir(reports_dir):
+            if f.endswith('.html'):
+                all_reports.append(f)
     except FileNotFoundError:
         flash('Compliance reports directory not found.', 'error')
-        return render_template('compliance_reports.html', reports=[], default_report=None)
 
-@app.route('/archived_reports')
+    # Get reports from the archive directory
+    try:
+        for f in os.listdir(archive_dir):
+            if f.endswith('.html'):
+                all_reports.append(f)
+    except FileNotFoundError:
+        # It's okay if the archive directory doesn't exist yet
+        pass
+
+    # Sort all reports by modification time, newest first
+    def get_mtime(report_name):
+        path1 = os.path.join(reports_dir, report_name)
+        path2 = os.path.join(archive_dir, report_name)
+        if os.path.exists(path1):
+            return os.path.getmtime(path1)
+        elif os.path.exists(path2):
+            return os.path.getmtime(path2)
+        return 0
+
+    all_reports.sort(key=get_mtime, reverse=True)
+    
+    default_report = all_reports[0] if all_reports else None
+
+    return render_template(
+        'compliance_reports.html', 
+        reports=all_reports, 
+        default_report=default_report,
+        hosts_list=hosts_list
+    )
+
+@app.route('/view_oscap_report/<report_name>')
+@login_required
+def view_oscap_report(report_name):
+    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
+    archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
+    
+    report_path = os.path.join(reports_dir, report_name)
+    if os.path.exists(report_path):
+        return send_from_directory(reports_dir, report_name)
+    
+    archive_path = os.path.join(archive_dir, report_name)
+    if os.path.exists(archive_path):
+        return send_from_directory(archive_dir, report_name)
+        
+    return "Report not found", 404
+
+@app.route('/archived_reports', methods=['GET', 'POST'])
 @login_required
 def archived_reports():
+    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
     archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
-    try:
-        archived_reports = sorted([f for f in os.listdir(archive_dir) if f.endswith('.html')])
-        return render_template('archived_reports.html', archived_reports=archived_reports)
-    except FileNotFoundError:
-        flash('Archived reports directory not found.', 'error')
-        return render_template('archived_reports.html', archived_reports=[])
+    search_host = request.form.get('search_host', '')
+    search_date = request.form.get('search_date', '')
+    hosts_list = get_inventory_hosts()
 
+    all_file_paths = {}
+    # Get reports from the archive directory first
+    if os.path.exists(archive_dir):
+        for f in os.listdir(archive_dir):
+            if f.endswith('.html') or f.endswith('.csv'):
+                all_file_paths[f] = os.path.join(archive_dir, f)
 
-@app.route('/compliance_report/<report_name>')
+    # Get reports from the main directory, overwriting archived ones if names conflict
+    if os.path.exists(reports_dir):
+        for f in os.listdir(reports_dir):
+            if f.endswith('.html') or f.endswith('.csv'):
+                all_file_paths[f] = os.path.join(reports_dir, f)
+
+    # Filter based on search
+    filtered_files = list(all_file_paths.keys())
+    if search_host:
+        filtered_files = [f for f in filtered_files if search_host.lower() in f.lower()]
+    
+    if search_date:
+        filtered_files = [f for f in filtered_files if search_date in f]
+
+    # Sort by modification time
+    filtered_files.sort(key=lambda f: os.path.getmtime(all_file_paths[f]), reverse=True)
+    
+    return render_template('archived_reports.html', 
+                           archived_reports=filtered_files, 
+                           hosts_list=hosts_list,
+                           search_host=search_host, 
+                           search_date=search_date)
+
+@app.route('/view_report/<report_name>')
 @login_required
-def view_compliance_report(report_name):
-    reports_dir = os.path.join(app.static_folder, 'goss_reports')
-    return send_from_directory(reports_dir, report_name)
-
-@app.route('/archived_report/<report_name>')
-@login_required
-def view_archived_report(report_name):
+def view_report(report_name):
+    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
     archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
-    return send_from_directory(archive_dir, report_name)
+    
+    report_path_main = os.path.join(reports_dir, report_name)
+    report_path_archive = os.path.join(archive_dir, report_name)
+
+    if os.path.exists(report_path_main):
+        return send_from_directory(reports_dir, report_name)
+    elif os.path.exists(report_path_archive):
+        return send_from_directory(archive_dir, report_name)
+    else:
+        return "Report not found", 404
+
+@app.route('/download_selected_reports', methods=['POST'])
+@login_required
+def download_selected_reports():
+    selected_files = request.json.get('files', [])
+    if not selected_files:
+        return jsonify({'message': 'No files selected.'}), 400
+
+    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
+    archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
+    zip_path = os.path.join('/tmp', f"compliance_reports_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.zip")
+
+    with zipfile.ZipFile(zip_path, 'w') as zipf:
+        for filename in selected_files:
+            path_main = os.path.join(reports_dir, filename)
+            path_archive = os.path.join(archive_dir, filename)
+            
+            file_to_zip = None
+            if os.path.exists(path_main):
+                file_to_zip = path_main
+            elif os.path.exists(path_archive):
+                file_to_zip = path_archive
+            
+            if file_to_zip:
+                zipf.write(file_to_zip, filename)
+
+    return send_from_directory('/tmp', os.path.basename(zip_path), as_attachment=True)
+
+@app.route('/delete_selected_reports', methods=['POST'])
+@login_required
+def delete_selected_reports():
+    selected_files = request.json.get('files', [])
+    if not selected_files:
+        return jsonify({'message': 'No files selected.'}), 400
+
+    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
+    archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
+    deleted_count = 0
+    errors = []
+
+    for filename in selected_files:
+        path_main = os.path.join(reports_dir, filename)
+        path_archive = os.path.join(archive_dir, filename)
+        
+        file_to_delete = None
+        if os.path.exists(path_main):
+            file_to_delete = path_main
+        elif os.path.exists(path_archive):
+            file_to_delete = path_archive
+
+        if file_to_delete:
+            try:
+                os.remove(file_to_delete)
+                deleted_count += 1
+            except OSError as e:
+                errors.append(f"Error deleting {filename}: {e}")
+        else:
+            errors.append(f"File not found: {filename}")
+
+    if errors:
+        flash(f"Deleted {deleted_count} reports, but encountered errors: {', '.join(errors)}", 'warning')
+    else:
+        flash(f"Successfully deleted {deleted_count} reports.", 'success')
+    
+    return jsonify({'message': f'Deleted {deleted_count} reports.'}), 200
 
 @app.route('/get_host_status/<hostname>')
 @login_required
@@ -1107,23 +1377,58 @@ def get_host_status(hostname):
         return "Unauthorized", 401
     try:
         ssh, ansible_host = get_ssh_connection(hostname)
+        os_info = "N/A"
+        uptime = "N/A"
+        patch_status = 'No patches needed'
+        reboot_required = False
 
         if ssh == 'local':
-            command = 'sudo unattended-upgrades --dry-run'
-            process = subprocess.run(command.split(), capture_output=True, text=True, check=False)
-            security_output = process.stdout + process.stderr
-        else:
-            stdin, stdout, stderr = ssh.exec_command('sudo unattended-upgrades --dry-run')
-            security_output = stdout.read().decode('utf-8') + stderr.read().decode('utf-8')
-            ssh.close()
+            # Get OS Info
+            os_process = subprocess.run(['lsb_release', '-d'], capture_output=True, text=True, check=False)
+            if os_process.returncode == 0:
+                os_info = os_process.stdout.split(":")[1].strip()
 
-        if "pkgs that will be upgraded:" in security_output.lower() or "/var/cache/apt/archives/" in security_output:
-             return jsonify({'status': 'Patches needed'})
+            # Get Patch Status
+            sec_process = subprocess.run(['sudo', 'unattended-upgrades', '--dry-run'], capture_output=True, text=True, check=False)
+            security_output = sec_process.stdout + sec_process.stderr
+            if "/usr/bin/dpkg" in security_output and "--unpack" in security_output:
+                patch_status = 'Patches needed'
+
+            # Get Uptime
+            uptime_process = subprocess.run(['uptime', '-p'], capture_output=True, text=True, check=False)
+            if uptime_process.returncode == 0:
+                uptime = uptime_process.stdout.strip().replace('up ', '')
+            
+            reboot_required = os.path.exists('/var/run/reboot-required')
+
         else:
-             return jsonify({'status': 'No patches needed'})
+            try:
+                # Get OS Info
+                stdin, stdout, stderr = ssh.exec_command('lsb_release -d')
+                os_output = stdout.read().decode('utf-8')
+                if "Description" in os_output:
+                    os_info = os_output.split(":")[1].strip()
+
+                # Get Patch Status
+                stdin, stdout, stderr = ssh.exec_command('sudo unattended-upgrades --dry-run')
+                security_output = stdout.read().decode('utf-8') + stderr.read().decode('utf-8')
+                if "/usr/bin/dpkg" in security_output and "--unpack" in security_output:
+                    patch_status = 'Patches needed'
+
+                # Get Uptime
+                stdin, stdout, stderr = ssh.exec_command('uptime -p')
+                uptime = stdout.read().decode('utf-8').strip().replace('up ', '')
+
+                stdin, stdout, stderr = ssh.exec_command('if [ -f /var/run/reboot-required ]; then echo "reboot required"; fi')
+                reboot_status = stdout.read().decode('utf-8').strip()
+                reboot_required = reboot_status == "reboot required"
+            finally:
+                ssh.close()
+
+        return jsonify({'status': patch_status, 'os_info': os_info, 'uptime': uptime, 'reboot_required': reboot_required})
 
     except Exception as e:
-        return jsonify({'status': 'Error', 'message': str(e)})
+        return jsonify({'status': 'Error', 'message': str(e), 'os_info': 'Error', 'uptime': 'Error', 'reboot_required': False})
 
 @app.route('/get_updates/<hostname>/<update_type>')
 @login_required
@@ -1133,6 +1438,26 @@ def get_updates(hostname, update_type):
     try:
         ssh, ansible_host = get_ssh_connection(hostname)
 
+        # Get security updates
+        if ssh == 'local':
+            command = "sudo unattended-upgrades --dry-run -v"
+            process = subprocess.run(command.split(), capture_output=True, text=True, check=False)
+            security_output = process.stdout + process.stderr
+        else:
+            stdin, stdout, stderr = ssh.exec_command("sudo unattended-upgrades --dry-run -v")
+            security_output = stdout.read().decode('utf-8') + stderr.read().decode('utf-8')
+
+        security_updates_list = []
+        for line in security_output.splitlines():
+            if line.startswith("Packages that will be upgraded:"):
+                packages = line.split(":")[1].strip().split()
+                for pkg in packages:
+                    if pkg not in security_updates_list:
+                        security_updates_list.append(pkg)
+
+        if update_type == 'security':
+            return jsonify(security_updates_list)
+
         # Get all upgradable packages
         if ssh == 'local':
             command = 'apt list --upgradable'
@@ -1141,28 +1466,7 @@ def get_updates(hostname, update_type):
         else:
             stdin, stdout, stderr = ssh.exec_command('apt list --upgradable')
             upgradable_output = stdout.read().decode('utf-8') + stderr.read().decode('utf-8')
-
-        # Get security updates
-        if ssh == 'local':
-            command = 'sudo unattended-upgrades --dry-run'
-            process = subprocess.run(command.split(), capture_output=True, text=True, check=False)
-            security_output = process.stdout + process.stderr
-        else:
-            stdin, stdout, stderr = ssh.exec_command('sudo unattended-upgrades --dry-run')
-            security_output = stdout.read().decode('utf-8') + stderr.read().decode('utf-8')
             ssh.close()
-
-        security_updates_list = []
-        for line in security_output.splitlines():
-            if "/usr/bin/dpkg" in line:
-                match = re.search(r'/var/cache/apt/archives/(.+?)_', line)
-                if match:
-                    package_name = match.group(1)
-                    if package_name not in security_updates_list:
-                        security_updates_list.append(package_name)
-
-        if update_type == 'security':
-            return jsonify(security_updates_list)
 
         non_security_updates = []
         for line in upgradable_output.splitlines():
@@ -1235,6 +1539,8 @@ def run_patch(hostname, patch_type):
     thread.start()
     return jsonify({'task_id': task_id, 'message': f'Patching {patch_type} updates for {hostname} started.'}), 202
 
+
+
 def get_ssh_connection(hostname):
     inventory_path = os.path.join(os.path.dirname(__file__), 'inventory.ini')
     ansible_host = None
@@ -1267,24 +1573,69 @@ def get_ssh_connection(hostname):
 @login_required
 def upgrade_status():
     inventory_path = os.path.join(os.path.dirname(__file__), 'inventory.ini')
-    hosts = set() # Use a set to store unique hostnames
+    hosts_data = []
+    processed_hosts = set()
+    kubernetes_nodes = set()
+
     try:
+        # Get Kubernetes nodes
+        nodes_obj = core_api.list_node(watch=False)
+        kubernetes_nodes = {node.metadata.name for node in nodes_obj.items}
+
+        # Read inventory and process hosts
         with open(inventory_path, 'r') as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith('#') and not line.startswith('['):
-                    # Extract hostname, which is the first word before any spaces or ansible_ variables
                     hostname = line.split(' ')[0]
-                    hosts.add(hostname)
-        hosts_list = sorted(list(hosts)) # Convert set to list and sort for consistent display
+                    if hostname not in processed_hosts and hostname not in kubernetes_nodes:
+                        is_kubegui_controller = 'ansible_connection=local' in line
+                        hosts_data.append({
+                            'name': hostname,
+                            'is_kubegui_controller': is_kubegui_controller,
+                            'is_kubernetes_node': False
+                        })
+                        processed_hosts.add(hostname)
+        hosts_data.sort(key=lambda x: x['name'])
     except FileNotFoundError:
         flash("Inventory file not found. Please ensure inventory.ini exists in the application directory.", 'error')
-        hosts_list = []
     except Exception as e:
-        flash(f"Error reading inventory: {e}", 'error')
-        hosts_list = []
+        flash(f"Error processing hosts or Kubernetes nodes: {e}", 'error')
 
-    return render_template('upgrade_status.html', hosts_list=hosts_list)
+    return render_template('upgrade_status.html', hosts_data=hosts_data)
+
+@app.route('/reboot_selected', methods=['POST'])
+@login_required
+def reboot_selected():
+    selected_hosts = request.json.get('hosts', [])
+    if not selected_hosts:
+        return jsonify({'message': 'No hosts selected.'}), 400
+
+    inventory_path = os.path.join(os.path.dirname(__file__), 'inventory.ini')
+    local_host = None
+    try:
+        with open(inventory_path, 'r') as f:
+            for line in f:
+                if 'ansible_connection=local' in line:
+                    local_host = line.split()[0]
+                    break
+    except FileNotFoundError:
+        flash('inventory.ini not found!', 'error')
+        return jsonify({'message': 'inventory.ini not found!'}), 500
+
+    for host in selected_hosts:
+        task_id = str(uuid.uuid4())
+        
+        if host == local_host:
+            playbook_path = os.path.join(os.path.dirname(__file__), 'reboot_localhost.yml')
+            extra_vars = None
+        else:
+            playbook_path = os.path.join(os.path.dirname(__file__), 'reboot_node.yml')
+            extra_vars = {'target_host': host}
+            
+        run_ansible_playbook_async(task_id, 'reboot', playbook_path, inventory_path, extra_vars=extra_vars)
+    
+    return jsonify({'message': 'Reboot initiated for selected hosts.'}), 202
 
 @app.route('/run_upgrade_check/<hostname>', methods=['POST'])
 @login_required
@@ -1404,9 +1755,28 @@ def non_security_updates_output(hostname):
 @app.route('/download_summary_csv')
 @login_required
 def download_summary_csv():
-    csv_path = os.path.join(app.static_folder, 'oscap_reports', 'oscap_detailed_summary.csv')
-    if os.path.exists(csv_path):
-        return send_from_directory(os.path.join(app.static_folder, 'oscap_reports'), 'oscap_detailed_summary.csv', as_attachment=True)
+    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
+    archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
+    
+    latest_csv = None
+    latest_mtime = 0
+    
+    all_dirs = [reports_dir]
+    if os.path.exists(archive_dir):
+        all_dirs.append(archive_dir)
+
+    for directory in all_dirs:
+        if os.path.exists(directory):
+            for f in os.listdir(directory):
+                if f.endswith('.csv') and 'oscap_detailed_summary' in f:
+                    path = os.path.join(directory, f)
+                    mtime = os.path.getmtime(path)
+                    if mtime > latest_mtime:
+                        latest_csv = path
+                        latest_mtime = mtime
+
+    if latest_csv:
+        return send_from_directory(os.path.dirname(latest_csv), os.path.basename(latest_csv), as_attachment=True)
     else:
         flash('No detailed summary CSV found. Please run an OpenSCAP scan first.', 'warning')
         return redirect(url_for('compliance_reports'))
@@ -1415,14 +1785,25 @@ def download_summary_csv():
 @login_required
 def download_report(report_name, file_type):
     reports_dir = os.path.join(app.static_folder, 'oscap_reports')
-    report_path = os.path.join(reports_dir, report_name)
+    archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
     
+    report_path = os.path.join(reports_dir, report_name)
+    if not os.path.exists(report_path):
+        report_path = os.path.join(archive_dir, report_name)
+
     if not os.path.exists(report_path):
         flash('Report not found.', 'error')
         return redirect(url_for('compliance_reports'))
 
     if file_type == 'pdf':
         try:
+            # Check if wkhtmltopdf is installed
+            try:
+                subprocess.run(['which', 'wkhtmltopdf'], check=True, capture_output=True)
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                flash('Error: wkhtmltopdf is not installed. Please install it to generate PDF reports.', 'error')
+                return redirect(url_for('compliance_reports'))
+
             pdf_path = os.path.join('/tmp', report_name.replace('.html', '.pdf'))
             pdfkit.from_file(report_path, pdf_path)
             return send_from_directory('/tmp', report_name.replace('.html', '.pdf'), as_attachment=True)
@@ -1430,8 +1811,82 @@ def download_report(report_name, file_type):
             flash(f"Error converting to PDF: {e}", 'error')
             return redirect(url_for('compliance_reports'))
     else:
-        return send_from_directory(reports_dir, report_name, as_attachment=True)
+        # For downloading the HTML file itself
+        if os.path.dirname(report_path) == reports_dir:
+            return send_from_directory(reports_dir, report_name, as_attachment=True)
+        else:
+            return send_from_directory(archive_dir, report_name, as_attachment=True)
 
+
+
+@app.route('/run_patch_selected/<patch_type>', methods=['POST'])
+@login_required
+def run_patch_selected(patch_type):
+    selected_hosts = request.json.get('hosts', [])
+    if not selected_hosts:
+        return jsonify({'message': 'No hosts selected.'}), 400
+
+    for host in selected_hosts:
+        task_id = str(uuid.uuid4())
+        if patch_type == 'security':
+            command_to_run = 'sudo unattended-upgrades --debug'
+        elif patch_type == 'non-security':
+            command_to_run = 'sudo apt-get update && sudo apt-get dist-upgrade -y'
+        else:
+            return jsonify({'message': 'Invalid patch type.'}), 400
+
+        def run_patch_async(task_id, hostname, command_to_run, patch_type):
+            running_tasks[task_id] = {'status': 'running', 'output': '', 'type': 'patch', 'hostname': hostname, 'patch_type': patch_type}
+            try:
+                ssh, ansible_host = get_ssh_connection(hostname)
+                if ssh == 'local':
+                    process = subprocess.run(command_to_run, shell=True, capture_output=True, text=True, check=False)
+                    output = process.stdout + process.stderr
+                else:
+                    if patch_type == 'non-security':
+                        stdin, stdout, stderr = ssh.exec_command('sudo apt-get update')
+                        output1 = stdout.read().decode('utf-8') + stderr.read().decode('utf-8')
+                        
+                        stdin, stdout, stderr = ssh.exec_command('sudo apt-get dist-upgrade -y')
+                        output2 = stdout.read().decode('utf-8') + stderr.read().decode('utf-8')
+                        output = output1 + "\n--- apt-get dist-upgrade ---\n" + output2
+                    else:
+                        stdin, stdout, stderr = ssh.exec_command(command_to_run)
+                        output = stdout.read().decode('utf-8') + stderr.read().decode('utf-8')
+                    ssh.close()
+                
+                log_dir = os.path.join(os.path.dirname(__file__), 'patch_logs')
+                if not os.path.exists(log_dir):
+                    os.makedirs(log_dir)
+                
+                timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                log_file = os.path.join(log_dir, f'{hostname}_{patch_type}_{timestamp}.log')
+                with open(log_file, 'w') as f:
+                    f.write(output)
+
+                if 'No packages found that can be upgraded' in output:
+                    running_tasks[task_id]['status'] = 'completed'
+                else:
+                    running_tasks[task_id]['status'] = 'error'
+                    running_tasks[task_id]['output'] = 'unattended-upgrades command failed'
+            except Exception as e:
+                running_tasks[task_id]['status'] = 'error'
+                running_tasks[task_id]['output'] = str(e)
+
+        thread = threading.Thread(target=run_patch_async, args=(task_id, host, command_to_run, patch_type))
+        thread.start()
+    
+    return jsonify({'message': f'Patching {patch_type} updates for selected hosts started.'}), 202
+
+
+@app.route('/chatbot', methods=['GET', 'POST'])
+@login_required
+def chatbot_route():
+    if request.method == 'POST':
+        user_message = request.json['message']
+        response = chatbot(user_message, max_length=150, num_return_sequences=1)
+        return jsonify({'response': response[0]['generated_text']})
+    return render_template('chatbot.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)

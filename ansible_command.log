@@ -1,34 +1,39 @@
-Executing Ansible command: /home/keith/simple_kube_web_app/venv/bin/ansible-playbook -i /home/keith/simple_kube_web_app/inventory.ini --user keith --private-key /home/keith/.ssh/id_rsa --extra-vars ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --extra-vars ansible_python_interpreter=/usr/bin/python3 /home/keith/simple_kube_web_app/ansible_oscap_scan/oscap_scan.yml
+Executing Ansible command: /home/keith/simple_kube_web_app/venv/bin/ansible-playbook -i /home/keith/simple_kube_web_app/inventory.ini --user keith --private-key /home/keith/.ssh/id_rsa --extra-vars ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --extra-vars ansible_python_interpreter=/usr/bin/python3 /home/keith/simple_kube_web_app/ansible_oscap_scan/generate_reports.yml
 
 
-PLAY [Install OpenSCAP, Run Scan, and Fetch XML] *******************************
+PLAY [Generate and Archive HTML Reports on Localhost] **************************
 
 TASK [Gathering Facts] *********************************************************
-ok: [mstr120]
-ok: [mstr124]
-ok: [mstr324]
-ok: [mstr224]
-ok: [wrkr124]
-ok: [wrkr224]
-ok: [wrkr324]
+ok: [localhost]
 
-TASK [Set OS-specific variables] ***********************************************
-ok: [mstr120]
-ok: [mstr124]
-ok: [mstr224]
-ok: [mstr324]
-ok: [wrkr124]
-ok: [wrkr224]
-ok: [wrkr324]
+TASK [Create archive directory if it doesn't exist] ****************************
+ok: [localhost]
 
-TASK [Fail on unsupported OS] **************************************************
-skipping: [mstr120]
-skipping: [mstr124]
-skipping: [mstr224]
-skipping: [mstr324]
-skipping: [wrkr124]
-skipping: [wrkr224]
-skipping: [wrkr324]
+TASK [Find old HTML reports to archive] ****************************************
+ok: [localhost]
 
-TASK [Install OpenSCAP Scanner and Unzip] **************************************
-ok: [mstr324]
+TASK [Archive old HTML reports] ************************************************
+changed: [localhost] => (item=/home/keith/simple_kube_web_app/static/oscap_reports/scan-results-mstr124-2025-07-06T00-27-46.html)
+
+TASK [Find old CSV reports to archive] *****************************************
+ok: [localhost]
+
+TASK [Archive old CSV reports] *************************************************
+changed: [localhost] => (item=/home/keith/simple_kube_web_app/static/oscap_reports/oscap_detailed_summary.csv)
+changed: [localhost] => (item=/home/keith/simple_kube_web_app/static/oscap_reports/2025-07-06_00-27-48_oscap_detailed_summary.csv)
+
+TASK [Find all XML reports fetched from hosts] *********************************
+ok: [localhost]
+
+TASK [Generate individual HTML reports from XML] *******************************
+ok: [localhost]
+
+TASK [Enforce 30-day retention policy on archived reports] *********************
+ok: [localhost]
+
+TASK [Delete reports older than 30 days] ***************************************
+skipping: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=9    changed=2    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+

@@ -1,0 +1,23 @@
+- name: Generate HTML Reports on Localhost
+  hosts: localhost
+  connection: local
+  vars:
+    timestamp: "{{ now(utc=True, fmt='%Y-%m-%dT%H-%M-%S') }}"
+  tasks:
+    - name: Find all XML reports fetched from hosts
+      find:
+        paths: "{{ playbook_dir }}/../tmp_reports"
+        patterns: "*.xml"
+      register: xml_reports
+
+    - name: Generate individual HTML reports from XML
+      shell: |
+        set -e
+        for xml_file in {{ xml_reports.files | map(attribute='path') | join(' ') }}; do
+          html_file="{{ playbook_dir }}/../static/oscap_reports/$(basename "$xml_file" .xml)-{{ timestamp }}.html"
+          oscap xccdf generate report --output "$html_file" "$xml_file"
+        done
+      changed_when: false
+      args:
+        executable: /bin/bash
+

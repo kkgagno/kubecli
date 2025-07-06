@@ -8,10 +8,29 @@ The application is a single-page Flask application that uses the official Python
 
 The application also integrates with Ansible to perform more complex tasks:
 
-*   **GOSS Compliance:** Runs an Ansible playbook to execute GOSS tests on your nodes and generate compliance reports.
+*   **OpenSCAP Compliance:** Runs an Ansible playbook to execute OpenSCAP tests on your nodes and generate compliance reports.
 *   **Upgrade Checks:** Uses an Ansible playbook to check for available package upgrades on your nodes.
 
 All long-running tasks, like running Ansible playbooks, are executed asynchronously in the background using Python's `threading` module to avoid blocking the web interface. The status of these tasks can be monitored through the web UI.
+
+## Archiving
+
+### Compliance Reports
+
+*   **HTML Reports:**
+    *   **Location:** Active reports are in `static/goss_reports/`, while archived reports are in `static/goss_reports_archive/`.
+    *   **Archiving:** When a new compliance report is generated, the old HTML reports are moved to the archive with a timestamp.
+    *   **Retention:** Archived HTML reports older than 10 days are automatically deleted.
+*   **CSV Reports:**
+    *   **Location:** `static/oscap_reports/`
+    *   **Archiving:** When a new OpenSCAP scan is run, a new, timestamped CSV report is generated.
+    *   **Retention:** CSV reports older than 30 days are automatically deleted.
+
+### Patching Logs
+
+*   **Location:** `patch_logs/`
+*   **Log Creation:** When a patch is applied to a node, a log file is created with the hostname, patch type, and a timestamp.
+*   **Retention:** Patch logs older than 30 days are automatically deleted.
 
 ## Features
 
@@ -37,7 +56,7 @@ All long-running tasks, like running Ansible playbooks, are executed asynchronou
 *   Professional look using Bootstrap.
 *   **Search functionality on all resource pages to filter by name (and message for events).**
 *   **Upgrade Status page to view pending security and non-security updates for each host.**
-*   **Compliance Reports page to view GOSS compliance reports, with the ability to download reports in PDF and CSV format.**
+*   **Compliance Reports page to view OpenSCAP compliance reports, with the ability to download reports in PDF and CSV format.**
 
 ## Configuration Variables
 
@@ -135,3 +154,4 @@ To stop the application, you can usually press `Ctrl+C` in the terminal where it
     ```bash
     kill <PID>
     ```
+

@@ -1,0 +1,103 @@
+Get:1 file:/usr/local/share/dummy-repo ./ InRelease
+Ign:1 file:/usr/local/share/dummy-repo ./ InRelease
+Get:2 file:/usr/local/share/dummy-repo ./ Release [844 B]
+Get:2 file:/usr/local/share/dummy-repo ./ Release [844 B]
+Get:3 file:/usr/local/share/dummy-repo ./ Release.gpg
+Ign:3 file:/usr/local/share/dummy-repo ./ Release.gpg
+Hit:4 http://us.archive.ubuntu.com/ubuntu noble InRelease
+Get:5 http://us.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:6 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:7 http://us.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:8 http://us.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [162 kB]
+Get:9 http://us.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+Get:10 http://us.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [377 kB]
+Get:11 http://us.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:12 http://us.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7,084 B]
+Get:13 http://us.archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
+Get:14 http://us.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [16.4 kB]
+Get:15 http://us.archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+Get:16 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
+Get:17 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+Get:18 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.2 kB]
+Get:19 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [212 B]
+Fetched 1,017 kB in 1s (921 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+Calculating upgrade...
+The following upgrades have been deferred due to phasing:
+  dnsmasq-base gzip ubuntu-drivers-common
+The following packages will be upgraded:
+  fwupd libfwupd2 libpciaccess0
+3 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
+Need to get 4,745 kB of archives.
+After this operation, 1,024 B of additional disk space will be used.
+Get:1 http://us.archive.ubuntu.com/ubuntu noble-updates/main amd64 libfwupd2 amd64 1.9.30-0ubuntu1~24.04.1 [136 kB]
+Get:2 http://us.archive.ubuntu.com/ubuntu noble-updates/main amd64 fwupd amd64 1.9.30-0ubuntu1~24.04.1 [4,589 kB]
+Get:3 http://us.archive.ubuntu.com/ubuntu noble-updates/main amd64 libpciaccess0 amd64 0.17-3ubuntu0.24.04.2 [18.9 kB]
+Fetched 4,745 kB in 1s (4,921 kB/s)
+(Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 176965 files and directories currently installed.)
+Preparing to unpack .../libfwupd2_1.9.30-0ubuntu1~24.04.1_amd64.deb ...
+Unpacking libfwupd2:amd64 (1.9.30-0ubuntu1~24.04.1) over (1.9.29-0ubuntu1~24.04.1ubuntu1) ...
+Preparing to unpack .../fwupd_1.9.30-0ubuntu1~24.04.1_amd64.deb ...
+Unpacking fwupd (1.9.30-0ubuntu1~24.04.1) over (1.9.29-0ubuntu1~24.04.1ubuntu1) ...
+Preparing to unpack .../libpciaccess0_0.17-3ubuntu0.24.04.2_amd64.deb ...
+Unpacking libpciaccess0:amd64 (0.17-3ubuntu0.24.04.2) over (0.17-3ubuntu0.24.04.1) ...
+Setting up libpciaccess0:amd64 (0.17-3ubuntu0.24.04.2) ...
+Setting up libfwupd2:amd64 (1.9.30-0ubuntu1~24.04.1) ...
+Setting up fwupd (1.9.30-0ubuntu1~24.04.1) ...
+fwupd-offline-update.service is a disabled or a static unit not running, not starting it.
+fwupd-refresh.service is a disabled or a static unit not running, not starting it.
+fwupd.service is a disabled or a static unit not running, not starting it.
+Processing triggers for libc-bin (2.39-0ubuntu8.4) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for dbus (1.14.10-4ubuntu4.1) ...
+Processing triggers for hicolor-icon-theme (0.17-2) ...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-62-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-63-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart docker.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ keith @ session #3: sshd[982]
+ keith @ session #355: sshd[1027687]
+ keith @ user manager service: systemd[860]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
