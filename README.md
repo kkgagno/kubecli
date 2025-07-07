@@ -8,7 +8,7 @@ The application is a single-page Flask application that uses the official Python
 
 The application also integrates with Ansible to perform more complex tasks:
 
-*   **GOSS Compliance:** Runs an Ansible playbook to execute GOSS tests on your nodes and generate compliance reports.
+*   **OSCAP Compliance:** Runs an Ansible playbook to execute GOSS tests on your nodes and generate compliance reports.
 *   **Upgrade Checks:** Uses an Ansible playbook to check for available package upgrades on your nodes.
 
 All long-running tasks, like running Ansible playbooks, are executed asynchronously in the background using Python's `threading` module to avoid blocking the web interface. The status of these tasks can be monitored through the web UI.
