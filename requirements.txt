@@ -48,3 +48,4 @@ Markdown
 torch
 transformers
 accelerate
+ollama

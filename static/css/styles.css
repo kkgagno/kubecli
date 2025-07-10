@@ -181,3 +181,18 @@ a:hover {
     color: #fff;
     text-shadow: 0 0 5px #000;
 }
+
+/* Styles for chatbot code blocks */
+#chat-body pre {
+    background-color: #282c34; /* Dark background for code */
+    color: #abb2bf; /* Light text for code */
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto; /* Allow horizontal scrolling for long lines */
+    white-space: pre-wrap; /* Wrap long lines */
+    word-wrap: break-word;
+}
+
+#chat-body code {
+    font-family: 'Courier New', Courier, monospace;
+}

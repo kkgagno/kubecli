@@ -40,7 +40,7 @@
         {% for report in archived_reports %}
             <li class="list-group-item">
                 <input type="checkbox" class="form-check-input me-2 report-checkbox" value="{{ report }}">
-                <a href="{{ url_for('view_oscap_report', report_name=report) }}" class="report-link">{{ report }}</a>
+                <a href="{{ url_for('view_oscap_report', report_name=report) }}">{{ report }}</a>
             </li>
         {% else %}
             <li class="list-group-item">No archived reports found.</li>

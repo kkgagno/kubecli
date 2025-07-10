@@ -1,16 +1,20 @@
 {% extends 'base.html' %}
 
-{% block title %}Llama3 Chatbot{% endblock %}
+{% block title %}Ollama Chatbot (phi3){% endblock %}
 
 {% block content %}
+<div class="alert alert-info" role="alert">
+  Note: This chatbot requires Ollama and Phi-3 to be installed and running.
+</div>
 <div class="container-fluid h-100">
     <div class="row h-100">
         <div class="col-12">
             <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Llama3 Chatbot</h5>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Ollama Chatbot (phi3)</h5>
+                    <button id="clear-chat" class="btn btn-outline-secondary btn-sm">Clear Chat</button>
                 </div>
-                <div class="card-body" id="chat-body" style="overflow-y: auto; height: 60vh;">
+                <div class="card-body" id="chat-body" style="overflow-y: auto; height: 60vh; color: white; background-color: #343a40;">
                     <!-- Chat messages will be appended here -->
                 </div>
                 <div class="card-footer">
@@ -29,43 +33,139 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const chatForm = document.getElementById('chat-form');
-    const userInput = document.getElementById('user-input');
-    const chatBody = document.getElementById('chat-body');
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Main Application Logic ---
+        function initChatbot(markdownEnabled) {
+            if (window.chatbotInitialized) return;
+            window.chatbotInitialized = true;
 
-    chatForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const userMessage = userInput.value;
-        if (!userMessage) return;
+            let md;
+            if (markdownEnabled && typeof window.markdownit === 'function') {
+                md = window.markdownit();
+                console.log("Markdown-it loaded successfully.");
+            } else {
+                console.log("Markdown rendering is disabled.");
+            }
 
-        appendMessage('You', userMessage);
-        userInput.value = '';
+            const chatBody = document.getElementById('chat-body');
+            const clearChatBtn = document.getElementById('clear-chat');
+            const chatForm = document.getElementById('chat-form');
+            const userInput = document.getElementById('user-input');
 
-        fetch('/chatbot', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ message: userMessage })
-        })
-        .then(response => response.json())
-        .then(data => {
-            appendMessage('Llama3', data.response);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            appendMessage('Error', 'An error occurred while processing your request.');
-        });
+            let chatHistory = [];
+
+            function loadChatHistory() {
+                const storedHistory = sessionStorage.getItem('chatHistory');
+                if (storedHistory) {
+                    chatHistory = JSON.parse(storedHistory);
+                    chatHistory.forEach(msg => appendMessage(msg.sender, msg.message, msg.isMarkdown, false));
+                }
+            }
+
+            function saveChatHistory() {
+                sessionStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            }
+
+            function appendMessage(sender, message, isMarkdown = false, save = true) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('mb-2');
+                const senderElement = document.createElement('strong');
+                senderElement.textContent = `${sender}: `;
+                messageElement.appendChild(senderElement);
+
+                if (isMarkdown && md) {
+                    messageElement.innerHTML += md.render(message);
+                } else {
+                    const textNode = document.createTextNode(message);
+                    messageElement.appendChild(textNode);
+                }
+                chatBody.appendChild(messageElement);
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+                if (save) {
+                    chatHistory.push({ sender, message, isMarkdown });
+                    saveChatHistory();
+                }
+                return messageElement;
+            }
+
+            clearChatBtn.addEventListener('click', function() {
+                chatBody.innerHTML = '';
+                chatHistory = [];
+                sessionStorage.removeItem('chatHistory');
+                appendMessage('System', 'Chat history cleared.');
+            });
+
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const userMessage = userInput.value.trim();
+                if (!userMessage) return;
+
+                appendMessage('You', userMessage);
+                userInput.value = '';
+                const thinkingMessage = appendMessage('Ollama (phi3)', '...');
+
+                fetch('/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userMessage })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.response) {
+                        thinkingMessage.remove();
+                        // Remove the thinking message from history before adding the real response
+                        chatHistory.pop(); 
+                        appendMessage('Ollama (phi3)', data.response, true);
+                    } else {
+                        throw new Error('Invalid response format from server.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    if (thinkingMessage) {
+                        thinkingMessage.innerHTML = `<strong>Error:</strong> Failed to get response. Check console for details.`;
+                        // Update the thinking message in history
+                        chatHistory.pop();
+                        chatHistory.push({ sender: 'Error', message: 'Failed to get response. Check console for details.', isMarkdown: false });
+                        saveChatHistory();
+                    }
+                });
+            });
+
+            loadChatHistory(); // Load history on init
+            if (chatHistory.length === 0) {
+                appendMessage('System', 'Chatbot initialized. Markdown ' + (markdownEnabled ? 'enabled.' : 'disabled.'));
+            }
+        }
+
+        // --- Dynamic Script Loading ---
+        function loadMarkdownScript() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js';
+            script.async = true;
+
+            script.onload = function() {
+                initChatbot(true); // Initialize with markdown
+            };
+
+            script.onerror = function() {
+                console.error("Failed to load markdown-it script.");
+                initChatbot(false); // Initialize without markdown
+            };
+
+            document.head.appendChild(script);
+        }
+
+        // Start the process
+        loadMarkdownScript();
     });
-
-    function appendMessage(sender, message) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('mb-2');
-        messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
-        chatBody.appendChild(messageElement);
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
-});
 </script>
 {% endblock %}

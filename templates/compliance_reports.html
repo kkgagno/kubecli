@@ -1,68 +1,90 @@
 {% extends 'base.html' %}
 
-{% block title %}Compliance Reports{% endblock %}
+{% block title %}Compliance and Vulnerability Reports{% endblock %}
 
 {% block content %}
-    <h1>Compliance Reports</h1>
+    <h1>Compliance and Vulnerability Reports</h1>
 
-    <!-- Controls -->
-    <div class="row mb-3">
-        <!-- Dropdown Selector -->
-        <div class="col-md-6">
-            <label for="reportSelector" class="form-label">Select a report to view:</label>
-            <select id="reportSelector" class="form-select">
-                {% for report in reports %}
-                    <option value="{{ report }}" {% if report == default_report %}selected{% endif %}>
-                        {{ report }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <!-- Search Controls -->
-        <div class="col-md-6">
-            <label class="form-label">Download Report:</label>
-            <div class="dropdown">
-                <button class="btn btn-success dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    Download
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
-                    <li><a class="dropdown-item" href="#" id="downloadPdf">PDF (Selected Report)</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('download_summary_csv') }}" id="downloadCsv">CSV (All selected in last run)</a></li>
-                </ul>
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs" id="reportTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="compliance-tab" data-bs-toggle="tab" data-bs-target="#compliance" type="button" role="tab" aria-controls="compliance" aria-selected="true">Compliance</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="{{ url_for('vulnerability_reports') }}">Vulnerability</a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="reportTabsContent">
+        <!-- Compliance Tab -->
+        <div class="tab-pane fade show active" id="compliance" role="tabpanel" aria-labelledby="compliance-tab">
+            <div class="mt-3">
+                <!-- Controls -->
+                <div class="row mb-3">
+                    <!-- Dropdown Selector -->
+                    <div class="col-md-6">
+                        <label for="reportSelector" class="form-label">Select a compliance report to view:</label>
+                        <select id="reportSelector" class="form-select">
+                            {% for report in reports %}
+                                <option value="{{ report }}" {% if report == default_report %}selected{% endif %}>
+                                    {{ report }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <!-- Download Controls -->
+                    <div class="col-md-6">
+                        <label class="form-label">Download Report:</label>
+                        <div class="dropdown">
+                            <button class="btn btn-success dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Download
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
+                                <li><a class="dropdown-item" href="#" id="downloadPdf">PDF (Selected Report)</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('download_summary_csv') }}" id="downloadCsv">CSV (Compliance Summary)</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button class="btn btn-info me-2" id="runOscapScanButton" data-bs-toggle="modal" data-bs-target="#oscapConfirmationModal" title="Run OpenSCAP compliance scan on selected nodes.">Run Compliance Scan</button>
+                        <a href="{{ url_for('archived_reports') }}" class="btn btn-secondary">View Archived Reports</a>
+                    </div>
+                </div>
+
+                <!-- Iframe to display report -->
+                <div style="position: relative;">
+                    {% if reports %}
+                        <iframe id="report-frame" src="{{ url_for('view_oscap_report', report_name=default_report) if default_report else '' }}" width="100%" height="800px" frameborder="0"></iframe>
+                    {% else %}
+                        <div class="alert alert-info" role="alert">
+                            No compliance reports found. Click "Run Compliance Scan" to generate reports.
+                        </div>
+                    {% endif %}
+
+                    <div id="playbookStatusContainer" class="d-none" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 10;">
+                        <div id="playbookStatus" class="alert" role="alert" style="position: sticky; top: 20px; margin: 20px;"></div>
+                        <pre id="playbookOutput" class="bg-light p-3 border rounded" style="max-height: 700px; overflow-y: scroll; margin: 20px; color: #212529;"></pre>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <button class="btn btn-info me-2" id="runOscapScanButton" data-bs-toggle="modal" data-bs-target="#oscapConfirmationModal" data-bs-toggle="tooltip" title="This will kick off OpenSCAP for compliance reporting across your kubernetes cluster nodes, run at times of low usage">Run OpenSCAP Scan</button>
-            <a href="{{ url_for('archived_reports') }}" class="btn btn-secondary">View Archived Reports</a>
-        </div>
-    </div>
-
-    <div id="playbookStatus" class="mt-3 alert d-none" role="alert"></div>
-    <pre id="playbookOutput" class="bg-light p-3 border rounded" style="max-height: 300px; overflow-y: scroll; display: none;"></pre>
-
-    <!-- Iframe to display report -->
-    {% if reports %}
-        <iframe id="report-frame" src="{{ url_for('view_oscap_report', report_name=default_report) if default_report else '' }}" width="100%" height="800px" frameborder="0"></iframe>
-    {% else %}
-        <div class="alert alert-info" role="alert">
-            No reports found. Click "Run OpenSCAP Scan" to generate reports.
-        </div>
-    {% endif %}
-
-    <!-- Confirmation Modal -->
+    <!-- Compliance Scan Confirmation Modal -->
     <div class="modal fade" id="oscapConfirmationModal" tabindex="-1" aria-labelledby="oscapConfirmationModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="oscapConfirmationModalLabel">Confirm Action</h5>
-            <button type="button" class="btn-close cancel-scan" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 class="modal-title" id="oscapConfirmationModalLabel">Confirm Compliance Scan</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <p>This will kick off OpenSCAP for compliance reporting across your Kubernetes cluster nodes and may affect performance. This is a lengthy process, please be patient. Are you sure you want to continue?</p>
-            <form id="oscapScanForm">
+            <p>This will run a compliance scan on the selected nodes. This is a lengthy process. Are you sure?</p>
+            <form id="oscapScanForm" action="{{ url_for('run_oscap_scan') }}" method="post">
                 <div class="mb-3">
                     <label for="hostSelector" class="form-label">Select hosts to scan:</label>
                     <select multiple class="form-control" id="hostSelector" name="selected_hosts" size="10">
@@ -74,14 +96,183 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary cancel-scan" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-danger" id="confirmRunOscapButton">Yes, Run Scan</button>
           </div>
         </div>
       </div>
     </div>
 
-    {% block scripts %}
-    <script src="{{ url_for('static', filename='js/compliance.js') }}"></script>
-    {% endblock %}
+    <!-- Vulnerability Scan Confirmation Modal -->
+    <div class="modal fade" id="vulnScanConfirmationModal" tabindex="-1" aria-labelledby="vulnScanConfirmationModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="vulnScanConfirmationModalLabel">Confirm Vulnerability Scan</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>This will run a vulnerability scan on the selected nodes. This may take some time. Are you sure?</p>
+            <form id="vulnScanForm" action="{{ url_for('run_vuln_scan') }}" method="post">
+                <div class="mb-3">
+                    <label for="vulnHostSelector" class="form-label">Select hosts to scan:</label>
+                    <select multiple class="form-control" id="vulnHostSelector" name="selected_hosts" size="10">
+                        {% for host in hosts_list %}
+                            <option value="{{ host }}">{{ host }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-warning" id="confirmRunVulnScanButton">Yes, Run Scan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Handle report selection for compliance
+    const reportSelector = document.getElementById('reportSelector');
+    if(reportSelector) {
+        reportSelector.addEventListener('change', function () {
+            const reportFrame = document.getElementById('report-frame');
+            if (reportFrame) {
+                reportFrame.src = `/view_oscap_report/${this.value}`;
+            }
+        });
+    }
+
+    // Handle PDF download
+    const downloadPdf = document.getElementById('downloadPdf');
+    if(downloadPdf) {
+        downloadPdf.addEventListener('click', function (e) {
+            e.preventDefault();
+            const selectedReport = reportSelector ? reportSelector.value : null;
+            if (selectedReport) {
+                window.location.href = `/download_report/${selectedReport}/pdf`;
+            } else {
+                alert('Please select a report to download.');
+            }
+        });
+    }
+
+    // Handle Compliance Scan Modal and Form Submission
+    const confirmRunOscapButton = document.getElementById('confirmRunOscapButton');
+    if(confirmRunOscapButton) {
+        confirmRunOscapButton.addEventListener('click', function () {
+            const form = document.getElementById('oscapScanForm');
+            const selectedHosts = Array.from(form.querySelector('select[name="selected_hosts"]').selectedOptions).map(opt => opt.value);
+            if (selectedHosts.length === 0) {
+                alert('Please select at least one host.');
+                return;
+            }
+            
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if(response.redirected) {
+                    window.location.href = response.url;
+                }
+            });
+            
+            var modal = bootstrap.Modal.getInstance(document.getElementById('oscapConfirmationModal'));
+            modal.hide();
+        });
+    }
+
+    // Handle Vulnerability Report Selection
+    const vulnReportSelector = document.getElementById('vulnReportSelector');
+    const vulnReportFrame = document.getElementById('vuln-report-frame');
+    const vulnResultsPlaceholder = document.getElementById('vulnerability-results-placeholder');
+
+    if(vulnReportSelector) {
+        vulnReportSelector.addEventListener('change', function () {
+            if (this.value) {
+                vulnReportFrame.src = `/view_oscap_report/${this.value}`;
+                vulnReportFrame.style.display = 'block';
+                vulnResultsPlaceholder.style.display = 'none';
+            } else {
+                vulnReportFrame.style.display = 'none';
+                vulnResultsPlaceholder.style.display = 'block';
+            }
+        });
+        // Trigger change on load to display the first report if available
+        if (vulnReportSelector.options.length > 0) {
+            vulnReportSelector.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Handle Vulnerability Scan Modal and Form Submission
+    const confirmRunVulnScanButton = document.getElementById('confirmRunVulnScanButton');
+    if(confirmRunVulnScanButton) {
+        confirmRunVulnScanButton.addEventListener('click', function () {
+            const form = document.getElementById('vulnScanForm');
+            const selectedHosts = Array.from(form.querySelector('select[name="selected_hosts"]').selectedOptions).map(opt => opt.value);
+            if (selectedHosts.length === 0) {
+                alert('Please select at least one host.');
+                return;
+            }
+
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if(response.redirected) {
+                    window.location.href = response.url;
+                }
+            });
+
+            var modal = bootstrap.Modal.getInstance(document.getElementById('vulnScanConfirmationModal'));
+            modal.hide();
+        });
+    }
+    
+    // Task status polling
+    function checkTaskStatus() {
+        fetch('/get_all_task_statuses')
+            .then(response => response.json())
+            .then(tasks => {
+                const statusContainer = document.getElementById('playbookStatusContainer');
+                const statusDiv = document.getElementById('playbookStatus');
+                const outputPre = document.getElementById('playbookOutput');
+                let runningTask = null;
+                let completedAndReloaded = false;
+
+                for (const taskId in tasks) {
+                    const task = tasks[taskId];
+                    if (task.type === 'oscap' && task.status === 'running') {
+                        runningTask = task;
+                    }
+                    if (task.status === 'completed_and_reloaded') {
+                        completedAndReloaded = true;
+                    }
+                }
+
+                if (runningTask) {
+                    statusContainer.classList.remove('d-none');
+                    statusDiv.textContent = `Task (${runningTask.type}) is running...`;
+                    statusDiv.className = 'alert alert-info';
+                    outputPre.textContent = runningTask.output;
+                    outputPre.scrollTop = outputPre.scrollHeight; // Auto-scroll
+                } else {
+                    statusContainer.classList.add('d-none');
+                    if (completedAndReloaded) {
+                         window.location.reload();
+                    }
+                }
+            });
+    }
+
+    setInterval(checkTaskStatus, 5000); // Poll every 5 seconds
+});
+</script>
 {% endblock %}

@@ -1,0 +1,73 @@
+---
+- name: Install OpenSCAP, Run Vulnerability Scan, and Fetch XML
+  hosts: "{{ hosts_to_scan | default('all:!nginx') }}"
+  become: yes
+  tasks:
+    - name: Set OS-specific variables for vulnerability scan
+      set_fact:
+        os_codename: "{{ 'noble' if ansible_distribution_version == '24.04' else 'focal' }}"
+        oscap_package_name: "{{ 'openscap-scanner' if ansible_distribution_version == '24.04' else 'libopenscap8' }}"
+      when: ansible_distribution_version in ['24.04', '20.04']
+
+    - name: Fail on unsupported OS
+      fail:
+        msg: "This playbook only supports Ubuntu 24.04 and 20.04."
+      when: ansible_distribution_version not in ['24.04', '20.04']
+
+    - name: Install OpenSCAP Scanner and bzip2
+      apt:
+        name:
+          - "{{ oscap_package_name }}"
+          - bzip2
+        state: present
+        update_cache: yes
+
+    - name: Download Ubuntu OVAL definitions
+      get_url:
+        url: "https://security-metadata.canonical.com/oval/com.ubuntu.{{ os_codename }}.usn.oval.xml.bz2"
+        dest: "/tmp/com.ubuntu.{{ os_codename }}.usn.oval.xml.bz2"
+        mode: '0644'
+
+    - name: Uncompress OVAL definitions
+      command:
+        cmd: "bunzip2 -f /tmp/com.ubuntu.{{ os_codename }}.usn.oval.xml.bz2"
+        creates: "/tmp/com.ubuntu.{{ os_codename }}.usn.oval.xml"
+
+    - name: Run OpenSCAP vulnerability scan
+      command:
+        cmd: >
+          oscap oval eval
+          --results /tmp/vuln-scan-results-{{ inventory_hostname }}.xml
+          /tmp/com.ubuntu.{{ os_codename }}.usn.oval.xml
+      register: oscap_scan
+      failed_when: "oscap_scan.rc not in [0, 2]"
+
+    - name: Generate CSV from OVAL results
+      command:
+        cmd: >
+          oscap oval generate report
+          --output /tmp/vulnerability-summary-{{ inventory_hostname }}.csv
+          /tmp/vuln-scan-results-{{ inventory_hostname }}.xml
+      register: oscap_csv_generation
+      failed_when: "oscap_csv_generation.rc != 0"
+
+    - name: Fetch the CSV report
+      fetch:
+        src: "/tmp/vulnerability-summary-{{ inventory_hostname }}.csv"
+        dest: "{{ playbook_dir }}/../tmp_reports/"
+        flat: yes
+
+    - name: Generate HTML from OVAL results
+      command:
+        cmd: >
+          oscap oval generate report
+          --output /tmp/vulnerability-report-{{ inventory_hostname }}.html
+          /tmp/vuln-scan-results-{{ inventory_hostname }}.xml
+      register: oscap_html_generation
+      failed_when: "oscap_html_generation.rc != 0"
+
+    - name: Fetch the HTML report
+      fetch:
+        src: "/tmp/vulnerability-report-{{ inventory_hostname }}.html"
+        dest: "{{ playbook_dir }}/../tmp_reports/"
+        flat: yes

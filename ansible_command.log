@@ -1,39 +1,11 @@
-Executing Ansible command: /home/keith/simple_kube_web_app/venv/bin/ansible-playbook -i /home/keith/simple_kube_web_app/inventory.ini --user keith --private-key /home/keith/.ssh/id_rsa --extra-vars ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --extra-vars ansible_python_interpreter=/usr/bin/python3 /home/keith/simple_kube_web_app/ansible_oscap_scan/generate_reports.yml
+Executing Ansible command: /home/keith/simple_kube_web_app/venv/bin/ansible-playbook -i /home/keith/simple_kube_web_app/inventory.ini --user keith --private-key /home/keith/.ssh/id_rsa --extra-vars ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --extra-vars ansible_python_interpreter=/usr/bin/python3 --extra-vars target_host=mstr124 /home/keith/simple_kube_web_app/reboot_node.yml
 
 
-PLAY [Generate and Archive HTML Reports on Localhost] **************************
+PLAY [Reboot a single node] ****************************************************
 
-TASK [Gathering Facts] *********************************************************
-ok: [localhost]
-
-TASK [Create archive directory if it doesn't exist] ****************************
-ok: [localhost]
-
-TASK [Find old HTML reports to archive] ****************************************
-ok: [localhost]
-
-TASK [Archive old HTML reports] ************************************************
-changed: [localhost] => (item=/home/keith/simple_kube_web_app/static/oscap_reports/scan-results-mstr124-2025-07-06T00-27-46.html)
-
-TASK [Find old CSV reports to archive] *****************************************
-ok: [localhost]
-
-TASK [Archive old CSV reports] *************************************************
-changed: [localhost] => (item=/home/keith/simple_kube_web_app/static/oscap_reports/oscap_detailed_summary.csv)
-changed: [localhost] => (item=/home/keith/simple_kube_web_app/static/oscap_reports/2025-07-06_00-27-48_oscap_detailed_summary.csv)
-
-TASK [Find all XML reports fetched from hosts] *********************************
-ok: [localhost]
-
-TASK [Generate individual HTML reports from XML] *******************************
-ok: [localhost]
-
-TASK [Enforce 30-day retention policy on archived reports] *********************
-ok: [localhost]
-
-TASK [Delete reports older than 30 days] ***************************************
-skipping: [localhost]
+TASK [Reboot the node and wait for it to come back] ****************************
+changed: [mstr124]
 
 PLAY RECAP *********************************************************************
-localhost                  : ok=9    changed=2    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+mstr124                    : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 

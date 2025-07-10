@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Archived Vulnerability Reports{% endblock %}
+
+{% block content %}
+    <h1>Archived Vulnerability Reports</h1>
+    <a href="{{ url_for('vulnerability_reports') }}" class="btn btn-primary mb-3">Back to Vulnerability Reports</a>
+
+    <form method="POST" action="{{ url_for('archived_vuln_reports') }}" class="row g-3 mb-3">
+        <div class="col-md-5">
+            <select name="search_host" class="form-select">
+                <option value="">All Hosts</option>
+                {% for host in hosts_list %}
+                    <option value="{{ host }}" {% if host == search_host %}selected{% endif %}>{{ host }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-5">
+            <input type="date" name="search_date" class="form-control" value="{{ search_date }}">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
+    </form>
+
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <button type="button" class="btn btn-success" id="download-selected">Download Selected</button>
+            <button type="button" class="btn btn-danger" id="delete-selected">Delete Selected</button>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="select-all">
+            <label class="form-check-label" for="select-all">
+                Select/Deselect All
+            </label>
+        </div>
+    </div>
+
+    <ul class="list-group">
+        {% for report in archived_reports %}
+            <li class="list-group-item">
+                <input type="checkbox" class="form-check-input me-2 report-checkbox" value="{{ report }}">
+                <a href="{{ url_for('view_vuln_report', report_name=report) }}">{{ report }}</a>
+            </li>
+        {% else %}
+            <li class="list-group-item">No archived reports found.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.report-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const width = 1200;
+            const height = 800;
+            const left = (screen.width / 2) - (width / 2);
+            const top = (screen.height / 2) - (height / 2);
+            window.open(this.href, 'report-window', `width=${width},height=${height},top=${top},left=${left}`);
+        });
+    });
+});
+
+document.getElementById('select-all').addEventListener('change', function(e) {
+    document.querySelectorAll('.report-checkbox').forEach(checkbox => {
+        checkbox.checked = e.target.checked;
+    });
+});
+
+document.getElementById('download-selected').addEventListener('click', function() {
+    const selectedFiles = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb => cb.value);
+    if (selectedFiles.length === 0) {
+        alert('Please select at least one report to download.');
+        return;
+    }
+
+    fetch('/download_selected_reports', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ files: selectedFiles })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `vulnerability_reports_${new Date().toISOString().slice(0,10)}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while downloading the reports.');
+    });
+});
+
+document.getElementById('delete-selected').addEventListener('click', function() {
+    const selectedFiles = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb => cb.value);
+    if (selectedFiles.length === 0) {
+        alert('Please select at least one report to delete.');
+        return;
+    }
+
+    if (confirm('Are you sure you want to delete the selected reports?')) {
+        fetch('/delete_selected_reports', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ files: selectedFiles })
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('An error occurred while deleting the reports.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the reports.');
+        });
+    }
+});
+</script>
+{% endblock %}

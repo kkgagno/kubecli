@@ -1,130 +1,0 @@
-Running on the development release
-Starting unattended upgrades script
-Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security, origin=dummy-security-repo
-Initial blacklist: 
-Initial whitelist (not strict): 
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_universe_i18n_Translation-en'  a=noble-backports,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=59865 ID:21> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_universe_binary-amd64_Packages'  a=noble-backports,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=129281 ID:20> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_main_i18n_Translation-en'  a=noble-backports,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=118381 ID:19> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_main_binary-amd64_Packages'  a=noble-backports,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=248707 ID:18> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_multiverse_i18n_Translation-en'  a=noble-updates,c=multiverse,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=37325 ID:17> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_multiverse_binary-amd64_Packages'  a=noble-updates,c=multiverse,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=153753 ID:16> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_universe_i18n_Translation-en'  a=noble-updates,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=2247109 ID:15> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_universe_binary-amd64_Packages'  a=noble-updates,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=6589927 ID:14> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_restricted_i18n_Translation-en'  a=noble-updates,c=restricted,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=5797990 ID:13> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_restricted_binary-amd64_Packages'  a=noble-updates,c=restricted,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=8432471 ID:12> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_main_i18n_Translation-en'  a=noble-updates,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=4361522 ID:11> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_main_binary-amd64_Packages'  a=noble-updates,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=6762265 ID:10> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/pkgs.k8s.io_core:_stable:_v1.30_deb_Packages'  a=,c=,v=,o=obs://build.opensuse.org/isv:kubernetes:core:stable:v1.30/deb,l=isv:kubernetes:core:stable:v1.30 arch='' site='pkgs.k8s.io' IndexType='Debian Package Index' Size=112397 ID:1> with -32768 pin
-Applying pinning: PkgFilePin(id=21, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_universe_i18n_Translation-en'  a=noble-backports,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=59865 ID:21>
-Applying pinning: PkgFilePin(id=20, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_universe_binary-amd64_Packages'  a=noble-backports,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=129281 ID:20>
-Applying pinning: PkgFilePin(id=19, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_main_i18n_Translation-en'  a=noble-backports,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=118381 ID:19>
-Applying pinning: PkgFilePin(id=18, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_main_binary-amd64_Packages'  a=noble-backports,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=248707 ID:18>
-Applying pinning: PkgFilePin(id=17, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_multiverse_i18n_Translation-en'  a=noble-updates,c=multiverse,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=37325 ID:17>
-Applying pinning: PkgFilePin(id=16, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_multiverse_binary-amd64_Packages'  a=noble-updates,c=multiverse,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=153753 ID:16>
-Applying pinning: PkgFilePin(id=15, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_universe_i18n_Translation-en'  a=noble-updates,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=2247109 ID:15>
-Applying pinning: PkgFilePin(id=14, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_universe_binary-amd64_Packages'  a=noble-updates,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=6589927 ID:14>
-Applying pinning: PkgFilePin(id=13, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_restricted_i18n_Translation-en'  a=noble-updates,c=restricted,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=5797990 ID:13>
-Applying pinning: PkgFilePin(id=12, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_restricted_binary-amd64_Packages'  a=noble-updates,c=restricted,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=8432471 ID:12>
-Applying pinning: PkgFilePin(id=11, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_main_i18n_Translation-en'  a=noble-updates,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=4361522 ID:11>
-Applying pinning: PkgFilePin(id=10, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_main_binary-amd64_Packages'  a=noble-updates,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=6762265 ID:10>
-Applying pinning: PkgFilePin(id=1, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/pkgs.k8s.io_core:_stable:_v1.30_deb_Packages'  a=,c=,v=,o=obs://build.opensuse.org/isv:kubernetes:core:stable:v1.30/deb,l=isv:kubernetes:core:stable:v1.30 arch='' site='pkgs.k8s.io' IndexType='Debian Package Index' Size=112397 ID:1>
-Using (^linux-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^kfreebsd-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^gnumach-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-modules-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-kernel-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^linux-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^kfreebsd-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^gnumach-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-modules-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-kernel-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$) regexp to find kernel packages
-Using (^linux-.*-6\.8\.0\-63\-generic$|^linux-.*-6\.8\.0\-63$|^kfreebsd-.*-6\.8\.0\-63\-generic$|^kfreebsd-.*-6\.8\.0\-63$|^gnumach-.*-6\.8\.0\-63\-generic$|^gnumach-.*-6\.8\.0\-63$|^.*-modules-6\.8\.0\-63\-generic$|^.*-modules-6\.8\.0\-63$|^.*-kernel-6\.8\.0\-63\-generic$|^.*-kernel-6\.8\.0\-63$|^linux-.*-6\.8\.0\-63\-generic$|^linux-.*-6\.8\.0\-63$|^kfreebsd-.*-6\.8\.0\-63\-generic$|^kfreebsd-.*-6\.8\.0\-63$|^gnumach-.*-6\.8\.0\-63\-generic$|^gnumach-.*-6\.8\.0\-63$|^.*-modules-6\.8\.0\-63\-generic$|^.*-modules-6\.8\.0\-63$|^.*-kernel-6\.8\.0\-63\-generic$|^.*-kernel-6\.8\.0\-63$) regexp to find running kernel packages
-Checking: dummy-security-patch ([<Origin component:'' archive:'' origin:'dummy-security-repo' label:'' site:'' isTrusted:True>])
-Checking: fwupd ([<Origin component:'main' archive:'noble-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
-adjusting candidate version: fwupd=1.9.29-0ubuntu1~24.04.1ubuntu1
-Checking: gzip ([<Origin component:'main' archive:'noble-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
-adjusting candidate version: gzip=1.12-1ubuntu3
-Checking: libfwupd2 ([<Origin component:'main' archive:'noble-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
-adjusting candidate version: libfwupd2=1.9.29-0ubuntu1~24.04.1ubuntu1
-Checking: ubuntu-drivers-common ([<Origin component:'main' archive:'noble-updates' origin:'Ubuntu' label:'Ubuntu' site:'us.archive.ubuntu.com' isTrusted:True>])
-adjusting candidate version: ubuntu-drivers-common=1:0.9.7.6ubuntu3
-pkgs that look like they should be upgraded: dummy-security-patch
-Get:1 file:/usr/local/share/dummy-repo ./ dummy-security-patch 2.0 [484 B]      
-Fetched 0 B in 0s (0 B/s)                                                       
-fetch.run() result: 0
-<apt_pkg.AcquireItem object:Status: 2 Complete: 1 Local: 1 IsTrusted: 1 FileSize: 484 DestFile:'/usr/local/share/dummy-repo/./dummy-security-patch-2.0.deb' DescURI: 'file:/usr/local/share/dummy-repo/./dummy-security-patch-2.0.deb' ID:1 ErrorText: ''>
-check_conffile_prompt(/usr/local/share/dummy-repo/./dummy-security-patch-2.0.deb)
-found pkg: dummy-security-patch
-No conffiles in deb /usr/local/share/dummy-repo/./dummy-security-patch-2.0.deb (There is no member named 'conffiles')
-Packages blacklist due to conffile prompts: []
-Packages that will be upgraded: dummy-security-patch
-Writing dpkg log to /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
-applying set ['dummy-security-patch']
-(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 128483 files and directories currently installed.)
-Preparing to unpack ..././dummy-security-patch-2.0.deb ...
-Unpacking dummy-security-patch (2.0) over (1.0) ...
-Setting up dummy-security-patch (2.0) ...
-
-Running kernel seems to be up-to-date.
-
-No services need to be restarted.
-
-No containers need to be restarted.
-
-No user sessions are running outdated binaries.
-
-No VM guests are running outdated hypervisor (qemu) binaries on this host.
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_universe_i18n_Translation-en'  a=noble-backports,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=59865 ID:21> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_universe_binary-amd64_Packages'  a=noble-backports,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=129281 ID:20> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_main_i18n_Translation-en'  a=noble-backports,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=118381 ID:19> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_main_binary-amd64_Packages'  a=noble-backports,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=248707 ID:18> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_multiverse_i18n_Translation-en'  a=noble-updates,c=multiverse,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=37325 ID:17> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_multiverse_binary-amd64_Packages'  a=noble-updates,c=multiverse,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=153753 ID:16> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_universe_i18n_Translation-en'  a=noble-updates,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=2247109 ID:15> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_universe_binary-amd64_Packages'  a=noble-updates,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=6589927 ID:14> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_restricted_i18n_Translation-en'  a=noble-updates,c=restricted,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=5797990 ID:13> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_restricted_binary-amd64_Packages'  a=noble-updates,c=restricted,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=8432471 ID:12> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_main_i18n_Translation-en'  a=noble-updates,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=4361522 ID:11> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_main_binary-amd64_Packages'  a=noble-updates,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=6762265 ID:10> with -32768 pin
-Marking not allowed <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/pkgs.k8s.io_core:_stable:_v1.30_deb_Packages'  a=,c=,v=,o=obs://build.opensuse.org/isv:kubernetes:core:stable:v1.30/deb,l=isv:kubernetes:core:stable:v1.30 arch='' site='pkgs.k8s.io' IndexType='Debian Package Index' Size=112397 ID:1> with -32768 pin
-Applying pinning: PkgFilePin(id=21, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_universe_i18n_Translation-en'  a=noble-backports,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=59865 ID:21>
-Applying pinning: PkgFilePin(id=20, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_universe_binary-amd64_Packages'  a=noble-backports,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=129281 ID:20>
-Applying pinning: PkgFilePin(id=19, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_main_i18n_Translation-en'  a=noble-backports,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=118381 ID:19>
-Applying pinning: PkgFilePin(id=18, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-backports_main_binary-amd64_Packages'  a=noble-backports,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=248707 ID:18>
-Applying pinning: PkgFilePin(id=17, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_multiverse_i18n_Translation-en'  a=noble-updates,c=multiverse,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=37325 ID:17>
-Applying pinning: PkgFilePin(id=16, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_multiverse_binary-amd64_Packages'  a=noble-updates,c=multiverse,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=153753 ID:16>
-Applying pinning: PkgFilePin(id=15, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_universe_i18n_Translation-en'  a=noble-updates,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=2247109 ID:15>
-Applying pinning: PkgFilePin(id=14, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_universe_binary-amd64_Packages'  a=noble-updates,c=universe,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=6589927 ID:14>
-Applying pinning: PkgFilePin(id=13, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_restricted_i18n_Translation-en'  a=noble-updates,c=restricted,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=5797990 ID:13>
-Applying pinning: PkgFilePin(id=12, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_restricted_binary-amd64_Packages'  a=noble-updates,c=restricted,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=8432471 ID:12>
-Applying pinning: PkgFilePin(id=11, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_main_i18n_Translation-en'  a=noble-updates,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='' site='us.archive.ubuntu.com' IndexType='Debian Translation Index' Size=4361522 ID:11>
-Applying pinning: PkgFilePin(id=10, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/us.archive.ubuntu.com_ubuntu_dists_noble-updates_main_binary-amd64_Packages'  a=noble-updates,c=main,v=24.04,o=Ubuntu,l=Ubuntu arch='amd64' site='us.archive.ubuntu.com' IndexType='Debian Package Index' Size=6762265 ID:10>
-Applying pinning: PkgFilePin(id=1, priority=-32768)
-Applying pin -32768 to package_file: <apt_pkg.PackageFile object: filename:'/var/lib/apt/lists/pkgs.k8s.io_core:_stable:_v1.30_deb_Packages'  a=,c=,v=,o=obs://build.opensuse.org/isv:kubernetes:core:stable:v1.30/deb,l=isv:kubernetes:core:stable:v1.30 arch='' site='pkgs.k8s.io' IndexType='Debian Package Index' Size=112397 ID:1>
-left to upgrade set()
-All upgrades installed
-InstCount=0 DelCount=0 BrokenCount=0
-Package fwupd has a higher version available, checking if it is from an allowed origin and is not pinned down.
-Package gzip has a higher version available, checking if it is from an allowed origin and is not pinned down.
-Package libfwupd2 has a higher version available, checking if it is from an allowed origin and is not pinned down.
-Package ubuntu-drivers-common has a higher version available, checking if it is from an allowed origin and is not pinned down.
-Extracting content from /var/log/unattended-upgrades/unattended-upgrades-dpkg.log since 2025-07-04 15:47:45
-/usr/bin/unattended-upgrades:567: DeprecationWarning: This process (pid=76058) is multi-threaded, use of fork() may lead to deadlocks in the child.
-  pid = os.fork()

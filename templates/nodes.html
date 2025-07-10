@@ -23,7 +23,7 @@
             <span data-bs-toggle="tooltip" data-bs-placement="top" title="Must be cordoned to reboot">
                 <button type="button" class="btn btn-danger" id="reboot-selected">Reboot Selected</button>
             </span>
-            <button type="button" class="btn btn-secondary" id="refresh-data">Refresh Data</button>
+            <button type="button" class="btn btn-secondary" id="refresh-full-data">Refresh Data</button>
         </div>
     </div>
     <table class="table table-striped">
@@ -216,9 +216,26 @@ document.addEventListener('DOMContentLoaded', function () {
     restoreSelection();
     updateButtonStates();
 
-    document.getElementById('refresh-data').addEventListener('click', function() {
-        saveSelection();
-        location.reload();
+    document.getElementById('refresh-full-data').addEventListener('click', function() {
+        const refreshButton = this;
+        const originalHtml = refreshButton.innerHTML;
+        refreshButton.disabled = true;
+        refreshButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Refreshing...';
+
+        const promises = nodes.map(node => {
+            if (node.name) {
+                return fetchNodeDetails(node.name);
+            }
+            return Promise.resolve();
+        });
+
+        Promise.all(promises).finally(() => {
+            refreshButton.innerHTML = 'Done!';
+            setTimeout(() => {
+                refreshButton.disabled = false;
+                refreshButton.innerHTML = originalHtml;
+            }, 2000); // Revert back after 2 seconds
+        });
     });
 
     document.getElementById('cordon-selected').addEventListener('click', function() {
@@ -315,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         let results = [];
-        Promise.all(selectedHosts.map(hostname => {
+        let promises = selectedHosts.map(hostname => {
             return fetch(`/${action}/${hostname}`, {
                 method: 'POST',
                 headers: {
@@ -325,8 +342,25 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 results.push({hostname: hostname, data: data});
+                // Dynamically update the status cell and the underlying data object
+                if (data.new_status) {
+                    const nodeRow = document.getElementById(`node-row-${hostname}`);
+                    const node = nodes.find(n => n.name === hostname);
+                    if (nodeRow && node) {
+                        // Update the visible text in the table
+                        const statusCell = nodeRow.cells[2];
+                        statusCell.textContent = data.new_status;
+                        // Update the in-memory data object
+                        node.status = data.new_status;
+                    }
+                }
             });
-        })).then(() => {
+        });
+
+        Promise.all(promises).then(() => {
+            // Update button states now that the in-memory data is fresh
+            updateButtonStates();
+
             const modalBody = document.getElementById('actionResultModalBody');
             let content = '';
             results.forEach(result => {
@@ -357,12 +391,6 @@ document.addEventListener('DOMContentLoaded', function () {
             modalBody.innerHTML = content;
             const resultModal = new bootstrap.Modal(document.getElementById('actionResultModal'));
             resultModal.show();
-            
-            // Reload page when modal is closed
-            document.getElementById('actionResultModal').addEventListener('hidden.bs.modal', function () {
-                restoreSelection();
-                location.reload();
-            });
         }).catch(error => {
             console.error('Error:', error);
             alert(`An error occurred while performing the action.`);

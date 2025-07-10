@@ -23,10 +23,10 @@ from kubernetes import client, config
 import paramiko
 import socket
 from cleanup import cleanup_old_files
-from transformers import pipeline
+import ollama
 
 # Initialize the chatbot pipeline
-chatbot = pipeline("text-generation", model="meta-llama/Llama-3-8B")
+# chatbot = pipeline("text-generation", model="microsoft/Phi-3-mini-4k-instruct")
 
 app = Flask(__name__)
 app.secret_key = '3727fc9d59984122d856c7faa4b9078cf2ec7a74b857f62c' # Required for flash messages
@@ -92,7 +92,7 @@ def generate_detailed_oscap_csv():
 
     if os.path.exists(xml_dir):
         for filename in os.listdir(xml_dir):
-            if not filename.endswith('.xml'):
+            if not filename.startswith('scan-results-') or not filename.endswith('.xml'):
                 continue
 
             hostname = filename.replace('scan-results-', '').replace('.xml', '')
@@ -121,6 +121,158 @@ def generate_detailed_oscap_csv():
     with open(archive_csv_path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(summary_data)
+
+def generate_vuln_csv():
+    app.logger.info("--- Starting generate_vuln_csv ---")
+    tmp_reports_dir = os.path.join(os.path.dirname(__file__), 'tmp_reports')
+    reports_dir = os.path.join(app.static_folder, 'vulnerability_reports')
+    archive_dir = os.path.join(app.static_folder, 'vulnerability_reports_archive')
+
+    for d in [reports_dir, archive_dir]:
+        if not os.path.exists(d):
+            os.makedirs(d)
+
+    main_csv_filename = "vulnerability_summary.csv"
+    main_csv_path = os.path.join(reports_dir, main_csv_filename)
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    archive_csv_filename = f"{timestamp}_vulnerability_summary.csv"
+    archive_csv_path = os.path.join(archive_dir, archive_csv_filename)
+
+    summary_data = [['Hostname', 'Definition ID', 'Result', 'Title', 'Severity', 'CVEs']]
+    app.logger.info(f"Processing CSV files from: {tmp_reports_dir}")
+
+    if not os.path.exists(tmp_reports_dir):
+        app.logger.warning("tmp_reports directory not found.")
+        return
+
+    csv_files = [f for f in os.listdir(tmp_reports_dir) if f.startswith('vulnerability-summary-') and f.endswith('.csv')]
+    if not csv_files:
+        app.logger.warning("No vulnerability summary CSV files found in tmp_reports.")
+        with open(main_csv_path, 'w', newline='') as f:
+            csv.writer(f).writerows(summary_data)
+        with open(archive_csv_path, 'w', newline='') as f:
+            csv.writer(f).writerows(summary_data)
+        return
+
+    for filename in csv_files:
+        hostname = filename.replace('vulnerability-summary-', '').replace('.csv', '')
+        csv_path = os.path.join(tmp_reports_dir, filename)
+        app.logger.info(f"Processing file: {csv_path} for hostname: {hostname}")
+        
+        with open(csv_path, 'r') as f:
+            # Read the raw content
+            content = f.read()
+            # Use BeautifulSoup to parse the HTML content
+            soup = BeautifulSoup(content, 'html.parser')
+            # Find all table rows
+            rows = soup.find_all('tr')
+            for row in rows:
+                cols = [ele.text.strip() for ele in row.find_all('td')]
+                if len(cols) == 5:
+                    summary_data.append([hostname] + cols)
+
+    app.logger.info(f"Total results for CSV: {len(summary_data) - 1}")
+
+    try:
+        with open(main_csv_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerows(summary_data)
+        app.logger.info(f"Successfully wrote main CSV to: {main_csv_path}")
+
+        with open(archive_csv_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerows(summary_data)
+        app.logger.info(f"Successfully wrote archive CSV to: {archive_csv_path}")
+    except Exception as e:
+        app.logger.error(f"Error writing CSV file: {e}")
+
+    app.logger.info("--- Finished generate_vuln_csv ---")
+
+@app.route('/run_vuln_scan', methods=['POST'])
+@login_required
+def run_vuln_scan():
+    for task_id, task_info in running_tasks.items():
+        if task_info.get('type') == 'vuln_scan' and task_info.get('status') == 'running':
+            hosts = task_info.get('hosts', [])
+            return jsonify({'message': f'Vulnerability scan is already running on the following hosts: {", ".join(hosts)}'}), 409
+
+    selected_hosts = request.form.getlist('selected_hosts')
+    if not selected_hosts:
+        return jsonify({'message': 'No hosts selected for the scan.'}), 400
+
+    # Clean up old XML and CSV files from tmp_reports before starting a new scan
+    tmp_reports_dir = os.path.join(os.path.dirname(__file__), 'tmp_reports')
+    if os.path.exists(tmp_reports_dir):
+        for f in os.listdir(tmp_reports_dir):
+            if f.startswith('vuln-scan-results-') or f.startswith('vulnerability-summary-') or 'vulnerability-report-' in f:
+                os.remove(os.path.join(tmp_reports_dir, f))
+                app.logger.info(f"Removed old file: {f}")
+
+    # Move old reports to archive before starting a new scan
+    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
+    archive_dir = os.path.join(app.static_folder, 'vulnerability_reports_archive')
+    if not os.path.exists(archive_dir):
+        os.makedirs(archive_dir)
+    
+    now = datetime.datetime.now()
+    if os.path.exists(reports_dir):
+        for filename in os.listdir(reports_dir):
+            if 'vulnerability-report-' in filename and filename.endswith('.html'):
+                report_path = os.path.join(reports_dir, filename)
+                # To prevent re-archiving an already archived file, we create a more unique name in the archive
+                archive_filename = f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_{os.path.basename(filename)}"
+                archive_path = os.path.join(archive_dir, archive_filename)
+                os.rename(report_path, archive_path)
+
+    # Enforce retention policy on the archive
+    for filename in os.listdir(archive_dir):
+        archive_path = os.path.join(archive_dir, filename)
+        try:
+            # Extract the timestamp from the beginning of the filename
+            file_time_str = filename.split('_')[0]
+            file_time = datetime.datetime.strptime(file_time_str, '%Y-%m-%d')
+            if (now - file_time).days > 10:
+                os.remove(archive_path)
+        except (ValueError, IndexError):
+            pass # Ignore files with non-standard names
+
+    limit = ",".join(selected_hosts)
+    task_id = str(uuid.uuid4())
+    
+    inventory_path = os.path.join(os.path.dirname(__file__), 'inventory.ini')
+    scan_playbook_path = os.path.join(os.path.dirname(__file__), 'ansible_oscap_scan', 'oscap_vuln_scan.yml')
+
+    def worker():
+        running_tasks[task_id] = {'status': 'running', 'output': 'Starting Vulnerability scan...\n', 'type': 'vuln_scan', 'hosts': selected_hosts}
+        
+        scan_thread = run_ansible_playbook_async(task_id, 'vuln_scan', scan_playbook_path, inventory_path, None, limit, chained_task=True)
+        scan_thread.join()
+        
+        if running_tasks.get(task_id, {}).get('status') == 'failed':
+            return
+
+        running_tasks[task_id]['output'] += '\nScan complete. Processing reports...\n'
+        
+        # Move and timestamp HTML reports to the static directory
+        tmp_reports_dir = os.path.join(os.path.dirname(__file__), 'tmp_reports')
+        final_reports_dir = os.path.join(app.static_folder, 'vulnerability_reports')
+        if not os.path.exists(final_reports_dir):
+            os.makedirs(final_reports_dir)
+            
+        for filename in os.listdir(tmp_reports_dir):
+            if filename.startswith('vulnerability-report-') and filename.endswith('.html'):
+                timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                new_filename = f"{timestamp}_{filename}"
+                os.rename(os.path.join(tmp_reports_dir, filename), os.path.join(final_reports_dir, new_filename))
+
+        generate_vuln_csv()
+        running_tasks[task_id]['status'] = 'completed_and_reloaded'
+
+    thread = threading.Thread(target=worker)
+    thread.start()
+    flash('Vulnerability scan started.', 'info')
+    return redirect(url_for('vulnerability_reports'))
+
 
 def run_ansible_playbook_async(task_id, task_type, playbook_path, inventory_path, extra_vars=None, limit=None, chained_task=False):
     if not chained_task:
@@ -300,7 +452,17 @@ def get_task_status(task_id):
 @app.route('/get_all_task_statuses')
 @login_required
 def get_all_task_statuses():
-    return jsonify(running_tasks)
+    # Create a copy of the tasks to send, as we might modify the original
+    tasks_to_send = dict(running_tasks)
+    
+    # Identify tasks to be cleared
+    tasks_to_clear = [task_id for task_id, task_info in running_tasks.items() if task_info.get('status') == 'completed_and_reloaded']
+    
+    # Clear the completed tasks from the main dictionary
+    for task_id in tasks_to_clear:
+        del running_tasks[task_id]
+        
+    return jsonify(tasks_to_send)
 
 @app.route('/playbook_output/<task_id>')
 @login_required
@@ -639,8 +801,8 @@ def cordon_node(node_name):
                 errors.append(f"Error evicting pod {pod.metadata.name}: {e.reason}")
         
         if errors:
-            return jsonify({'status': 'error', 'message': f'Node {node_name} cordoned, but failed to drain all pods.', 'errors': errors, 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods}), 500
-        return jsonify({'status': 'success', 'message': f'Node {node_name} cordoned and drained successfully.', 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods})
+            return jsonify({'status': 'error', 'message': f'Node {node_name} cordoned, but failed to drain all pods.', 'errors': errors, 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods, 'new_status': 'Ready,SchedulingDisabled'}), 500
+        return jsonify({'status': 'success', 'message': f'Node {node_name} cordoned and drained successfully.', 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods, 'new_status': 'Ready,SchedulingDisabled'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Error cordoning node {node_name}: {e}'}), 500
 
@@ -653,8 +815,8 @@ def cordon_node_only(node_name):
                 "unschedulable": True
             }
         }
-        core_api.patch_node(name=node_name, body=body)
-        return jsonify({'status': 'success', 'message': f'Node {node_name} cordoned successfully.'})
+        node = core_api.patch_node(name=node_name, body=body)
+        return jsonify({'status': 'success', 'message': f'Node {node_name} cordoned successfully.', 'new_status': 'Ready,SchedulingDisabled'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Error cordoning node {node_name}: {e}'}), 500
 
@@ -691,8 +853,8 @@ def drain_node(node_name):
                 errors.append(f"Error evicting pod {pod.metadata.name}: {e.reason}")
         
         if errors:
-            return jsonify({'status': 'error', 'message': f'Failed to drain all pods from {node_name}.', 'errors': errors, 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods}), 500
-        return jsonify({'status': 'success', 'message': f'Node {node_name} drained successfully.', 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods})
+            return jsonify({'status': 'error', 'message': f'Failed to drain all pods from {node_name}.', 'errors': errors, 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods, 'new_status': 'Ready,SchedulingDisabled'}), 500
+        return jsonify({'status': 'success', 'message': f'Node {node_name} drained successfully.', 'evicted_pods': evicted_pods, 'ignored_pods': ignored_pods, 'new_status': 'Ready,SchedulingDisabled'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Error draining node {node_name}: {e}'}), 500
 
@@ -706,7 +868,7 @@ def uncordon_node(node_name):
             }
         }
         core_api.patch_node(name=node_name, body=body)
-        return jsonify({'status': 'success', 'message': f'Node {node_name} uncordoned successfully.'})
+        return jsonify({'status': 'success', 'message': f'Node {node_name} uncordoned successfully.', 'new_status': 'Ready'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Error uncordoning node {node_name}: {e}'}), 500
 
@@ -1199,7 +1361,7 @@ def compliance_reports():
     # Get reports from the main directory
     try:
         for f in os.listdir(reports_dir):
-            if f.endswith('.html'):
+            if f.endswith('.html') and not f.startswith('vulnerability-report-'):
                 all_reports.append(f)
     except FileNotFoundError:
         flash('Compliance reports directory not found.', 'error')
@@ -1207,7 +1369,7 @@ def compliance_reports():
     # Get reports from the archive directory
     try:
         for f in os.listdir(archive_dir):
-            if f.endswith('.html'):
+            if f.endswith('.html') and not f.startswith('vulnerability-report-'):
                 all_reports.append(f)
     except FileNotFoundError:
         # It's okay if the archive directory doesn't exist yet
@@ -1233,6 +1395,107 @@ def compliance_reports():
         default_report=default_report,
         hosts_list=hosts_list
     )
+
+@app.route('/vulnerability_reports')
+@login_required
+def vulnerability_reports():
+    reports_dir = os.path.join(app.static_folder, 'vulnerability_reports')
+    archive_dir = os.path.join(app.static_folder, 'vulnerability_reports_archive')
+    hosts_list = get_inventory_hosts()
+    
+    all_reports = []
+    
+    # Get reports from the main directory
+    try:
+        for f in os.listdir(reports_dir):
+            if 'vulnerability-report-' in f and f.endswith('.html'):
+                all_reports.append(f)
+    except FileNotFoundError:
+        flash('Vulnerability reports directory not found.', 'warning')
+
+    # Get reports from the archive directory
+    try:
+        for f in os.listdir(archive_dir):
+            if 'vulnerability-report-' in f and f.endswith('.html'):
+                all_reports.append(f)
+    except FileNotFoundError:
+        pass
+
+    # Sort all reports by modification time, newest first
+    def get_mtime(report_name):
+        path1 = os.path.join(reports_dir, report_name)
+        path2 = os.path.join(archive_dir, report_name)
+        if os.path.exists(path1):
+            return os.path.getmtime(path1)
+        elif os.path.exists(path2):
+            return os.path.getmtime(path2)
+        return 0
+
+    all_reports.sort(key=get_mtime, reverse=True)
+    
+    default_report = all_reports[0] if all_reports else None
+
+    return render_template(
+        'vulnerability_reports.html', 
+        reports=all_reports, 
+        default_report=default_report,
+        hosts_list=hosts_list
+    )
+
+@app.route('/archived_vuln_reports', methods=['GET', 'POST'])
+@login_required
+def archived_vuln_reports():
+    reports_dir = os.path.join(app.static_folder, 'vulnerability_reports')
+    archive_dir = os.path.join(app.static_folder, 'vulnerability_reports_archive')
+    search_host = request.form.get('search_host', '')
+    search_date = request.form.get('search_date', '')
+    hosts_list = get_inventory_hosts()
+
+    all_file_paths = {}
+    # Get reports from the archive directory first
+    if os.path.exists(archive_dir):
+        for f in os.listdir(archive_dir):
+            if 'vulnerability-report-' in f and (f.endswith('.html') or f.endswith('.csv')):
+                all_file_paths[f] = os.path.join(archive_dir, f)
+
+    # Get reports from the main directory, overwriting archived ones if names conflict
+    if os.path.exists(reports_dir):
+        for f in os.listdir(reports_dir):
+            if 'vulnerability-report-' in f and (f.endswith('.html') or f.endswith('.csv')):
+                all_file_paths[f] = os.path.join(reports_dir, f)
+
+    # Filter based on search
+    filtered_files = list(all_file_paths.keys())
+    if search_host:
+        filtered_files = [f for f in filtered_files if search_host.lower() in f.lower()]
+    
+    if search_date:
+        filtered_files = [f for f in filtered_files if search_date in f]
+
+    # Sort by modification time
+    filtered_files.sort(key=lambda f: os.path.getmtime(all_file_paths[f]), reverse=True)
+    
+    return render_template('archived_vuln_reports.html', 
+                           archived_reports=filtered_files, 
+                           hosts_list=hosts_list,
+                           search_host=search_host, 
+                           search_date=search_date)
+                           
+@app.route('/view_vuln_report/<report_name>')
+@login_required
+def view_vuln_report(report_name):
+    reports_dir = os.path.join(app.static_folder, 'vulnerability_reports')
+    archive_dir = os.path.join(app.static_folder, 'vulnerability_reports_archive')
+    
+    report_path = os.path.join(reports_dir, report_name)
+    if os.path.exists(report_path):
+        return send_from_directory(reports_dir, report_name)
+        
+    archive_path = os.path.join(archive_dir, report_name)
+    if os.path.exists(archive_path):
+        return send_from_directory(archive_dir, report_name)
+        
+    return "Report not found", 404
 
 @app.route('/view_oscap_report/<report_name>')
 @login_required
@@ -1288,22 +1551,6 @@ def archived_reports():
                            hosts_list=hosts_list,
                            search_host=search_host, 
                            search_date=search_date)
-
-@app.route('/view_report/<report_name>')
-@login_required
-def view_report(report_name):
-    reports_dir = os.path.join(app.static_folder, 'oscap_reports')
-    archive_dir = os.path.join(app.static_folder, 'oscap_reports_archive')
-    
-    report_path_main = os.path.join(reports_dir, report_name)
-    report_path_archive = os.path.join(archive_dir, report_name)
-
-    if os.path.exists(report_path_main):
-        return send_from_directory(reports_dir, report_name)
-    elif os.path.exists(report_path_archive):
-        return send_from_directory(archive_dir, report_name)
-    else:
-        return "Report not found", 404
 
 @app.route('/download_selected_reports', methods=['POST'])
 @login_required
@@ -1884,8 +2131,14 @@ def run_patch_selected(patch_type):
 def chatbot_route():
     if request.method == 'POST':
         user_message = request.json['message']
-        response = chatbot(user_message, max_length=150, num_return_sequences=1)
-        return jsonify({'response': response[0]['generated_text']})
+        response = ollama.chat(model='phi3', messages=[
+            {
+                'role': 'user',
+                'content': user_message,
+            },
+        ])
+        # Extract just the message content for the frontend
+        return jsonify({'response': response['message']['content']})
     return render_template('chatbot.html')
 
 if __name__ == '__main__':

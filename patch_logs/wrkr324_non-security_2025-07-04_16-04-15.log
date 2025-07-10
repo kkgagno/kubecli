@@ -1,82 +1,0 @@
-Get:1 file:/usr/local/share/dummy-repo ./ InRelease
-Ign:1 file:/usr/local/share/dummy-repo ./ InRelease
-Get:2 file:/usr/local/share/dummy-repo ./ Release [844 B]
-Get:2 file:/usr/local/share/dummy-repo ./ Release [844 B]
-Get:3 file:/usr/local/share/dummy-repo ./ Release.gpg
-Ign:3 file:/usr/local/share/dummy-repo ./ Release.gpg
-Hit:4 http://us.archive.ubuntu.com/ubuntu noble InRelease
-Get:5 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
-Get:6 http://us.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
-Hit:7 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.30/deb  InRelease
-Get:8 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
-Get:9 http://us.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
-Get:10 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
-Get:11 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.2 kB]
-Get:12 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [212 B]
-Get:13 http://us.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [162 kB]
-Get:14 http://us.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
-Get:15 http://us.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [377 kB]
-Get:16 http://us.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
-Get:17 http://us.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7,084 B]
-Get:18 http://us.archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
-Get:19 http://us.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [16.4 kB]
-Get:20 http://us.archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
-Fetched 1,017 kB in 1s (1,248 kB/s)
-Reading package lists...
-Reading package lists...
-Building dependency tree...
-Reading state information...
-Calculating upgrade...
-The following packages were automatically installed and are no longer required:
-  apport-symptoms python3-apport python3-problem-report python3-systemd
-Use 'sudo apt autoremove' to remove them.
-The following upgrades have been deferred due to phasing:
-  gzip ubuntu-drivers-common
-The following packages will be upgraded:
-  dnsmasq-base fwupd libfwupd2
-3 upgraded, 0 newly installed, 0 to remove and 2 not upgraded.
-Need to get 5,101 kB of archives.
-After this operation, 0 B of additional disk space will be used.
-Get:1 http://us.archive.ubuntu.com/ubuntu noble-updates/main amd64 dnsmasq-base amd64 2.90-2ubuntu0.1 [376 kB]
-Get:2 http://us.archive.ubuntu.com/ubuntu noble-updates/main amd64 libfwupd2 amd64 1.9.30-0ubuntu1~24.04.1 [136 kB]
-Get:3 http://us.archive.ubuntu.com/ubuntu noble-updates/main amd64 fwupd amd64 1.9.30-0ubuntu1~24.04.1 [4,589 kB]
-Fetched 5,101 kB in 1s (7,681 kB/s)
-(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 128788 files and directories currently installed.)
-Preparing to unpack .../dnsmasq-base_2.90-2ubuntu0.1_amd64.deb ...
-Unpacking dnsmasq-base (2.90-2ubuntu0.1) over (2.90-2build2) ...
-Preparing to unpack .../libfwupd2_1.9.30-0ubuntu1~24.04.1_amd64.deb ...
-Unpacking libfwupd2:amd64 (1.9.30-0ubuntu1~24.04.1) over (1.9.29-0ubuntu1~24.04.1ubuntu1) ...
-Preparing to unpack .../fwupd_1.9.30-0ubuntu1~24.04.1_amd64.deb ...
-Unpacking fwupd (1.9.30-0ubuntu1~24.04.1) over (1.9.29-0ubuntu1~24.04.1ubuntu1) ...
-Setting up libfwupd2:amd64 (1.9.30-0ubuntu1~24.04.1) ...
-Setting up dnsmasq-base (2.90-2ubuntu0.1) ...
-Setting up fwupd (1.9.30-0ubuntu1~24.04.1) ...
-fwupd-offline-update.service is a disabled or a static unit not running, not starting it.
-fwupd-refresh.service is a disabled or a static unit not running, not starting it.
-fwupd.service is a disabled or a static unit not running, not starting it.
-Processing triggers for man-db (2.12.0-4build2) ...
-Processing triggers for dbus (1.14.10-4ubuntu4.1) ...
-Processing triggers for libc-bin (2.39-0ubuntu8.4) ...
-debconf: unable to initialize frontend: Dialog
-debconf: (Dialog frontend will not work on a dumb terminal, an emacs shell buffer, or without a controlling terminal.)
-debconf: falling back to frontend: Readline
-debconf: unable to initialize frontend: Readline
-debconf: (This frontend requires a controlling tty.)
-debconf: falling back to frontend: Teletype
-dpkg-preconfigure: unable to re-open stdin: 
-debconf: unable to initialize frontend: Dialog
-debconf: (Dialog frontend will not work on a dumb terminal, an emacs shell buffer, or without a controlling terminal.)
-debconf: falling back to frontend: Readline
-debconf: unable to initialize frontend: Readline
-debconf: (This frontend requires a controlling tty.)
-debconf: falling back to frontend: Teletype
-
-Running kernel seems to be up-to-date.
-
-No services need to be restarted.
-
-No containers need to be restarted.
-
-No user sessions are running outdated binaries.
-
-No VM guests are running outdated hypervisor (qemu) binaries on this host.

@@ -1,0 +1,31 @@
+---
+- name: Prepare for OVAL Scan
+  hosts: all
+  become: yes
+  tasks:
+    - name: Set OS-specific codename
+      set_fact:
+        os_codename: "{{ 'noble' if ansible_distribution_version == '24.04' else 'focal' }}"
+      when: ansible_distribution_version in ['24.04', '20.04']
+
+    - name: Fail on unsupported OS
+      fail:
+        msg: "This playbook only supports Ubuntu 24.04 and 20.04."
+      when: ansible_distribution_version not in ['24.04', '20.04']
+
+    - name: Download Ubuntu OVAL definitions
+      get_url:
+        url: "https://security-metadata.canonical.com/oval/com.ubuntu.{{ os_codename }}.usn.oval.xml.bz2"
+        dest: "/tmp/com.ubuntu.{{ os_codename }}.usn.oval.xml.bz2"
+        mode: '0644'
+
+    - name: Uncompress OVAL definitions
+      command:
+        cmd: "bunzip2 -f /tmp/com.ubuntu.{{ os_codename }}.usn.oval.xml.bz2"
+        creates: "/tmp/com.ubuntu.{{ os_codename }}.usn.oval.xml"
+
+    - name: Fetch the OVAL definitions file
+      fetch:
+        src: /tmp/com.ubuntu.{{ os_codename }}.usn.oval.xml
+        dest: "{{ playbook_dir }}/../tmp_reports/"
+        flat: yes
